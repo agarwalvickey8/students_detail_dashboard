@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GCI Student Details</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        .header {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .header h1 {
+            margin: 0;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        .header-right > * {
+            margin-left: 20px;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .model-name {
+            text-align: center;
+        }
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .filter-bar input[type="text"],
+        .filter-bar select {
+            padding: 8px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .filter-bar button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .filter-bar button:hover {
+            background-color: #0056b3;
+        }
+        .logout-button {
+            padding: 10px 20px;
+            background-color: #dc3545;
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        .save-button {
+            padding: 8px 16px;
+            background-color: #007bff; /* Blue color */
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .save-button:hover {
+            background-color: #0056b3; /* Darker blue color on hover */
+        }        
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Students Detail Dashboard</h1>
+            <div class="header-right">
+                <form action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="logout-button">Logout</button>
+                </form>
+            </div>
+        </div>
+        <div class="content">
+            <div class="model-name">
+                <h2>{{ selected_model_name }} Details</h2> 
+            </div>
+            <div class="filter-bar">
+                <form id="filter-form" method="get">
+                    <select id="course-select" name="course" >
+                        <option value="">Select Course</option>
+                        <option value="Spartan Batch" {% if course == "Spartan Batch" %} selected {% endif %}>Spartan Batch</option>
+                        <option value="Course2" {% if course == "Course2" %} selected {% endif %}>Course 2</option>
+                        <option value="Course3" {% if course == "Course3" %} selected {% endif %}>Course 3</option>
+                    </select>
+                    <select id="batch-select" name="batch">
+                        <option value="">Select Batch</option>
+                        {% for batch_option in batch_options %}
+                        <option value="{{ batch_option }}" {% if batch_option == batch %} selected {% endif %}>{{ batch_option }}</option>
+                        {% endfor %}
+                    </select>
+                    <input type="text" name="registration_number" placeholder="Search by Registration Number" value="{{ registration_number }}">
+                    <input type="text" name="roll_number" placeholder="Search by Roll Number" value="{{ roll_number }}">
+                    <button type="submit">Apply Filter</button>
+                </form>
+            </div>
+            {% if selected_model_name == 'StudentDetails' %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Coaching Registration</th>
+                        <th>Coaching Roll</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_detail in student_details_data %}
+                    <tr>
+                        <td>{{ student_detail.Name }}</td>
+                        <td>{{ student_detail.CoachingRegisteration }}</td>
+                        <td>{{ student_detail.CoachingRoll }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            {% if neet_registeration_data %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Student Name</th>
+                        <th>Course</th>
+                        <th>Batch</th>
+                        <th>Coaching Roll No.</th>
+                        <th>Coaching Registeration No.</th>
+                        <th>NEET Application No.</th>
+                        <th>Mobile No.</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for neet_registration in neet_registeration_data %}
+                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" data-registration-id="{{ neet_registration.id }}">
+                        {% csrf_token %}
+                        <tr>
+                            <td>{{ neet_registration.StudentDetail.Name }}</td>
+                            <td>{{ neet_registration.StudentDetail.Course}}</td>
+                            <td>{{ neet_registration.StudentDetail.Batch }}</td>
+                            <td>{{ neet_registration.StudentDetail.CoachingRoll }}</td>
+                            <td>{{ neet_registration.StudentDetail.CoachingRegisteration }}</td>
+                            <td><input type="number" name="NEETApplication" value="{{ neet_registration.NEETApplication|default:'' }}"></td>
+                            <td><input type="number" name="Mobile" value="{{neet_registration.Mobile|default:''}}"></td>
+                            <td><button type="submit" class="save-button">Save</button></td>
+                        </tr>
+                    </form>                    
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>No data available.</p>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var courseSelect = document.getElementById("course-select");
+            var batchSelect = document.getElementById("batch-select");
+            courseSelect.addEventListener("change", function() {
+                var selectedCourse = courseSelect.value;
+                batchSelect.innerHTML = '<option value="">Select Batch</option>';
+                if (selectedCourse === "Spartan Batch") {
+                    populateBatchOptions(["FE4", "Batch2", "Batch3"]);
+                } else if (selectedCourse === "Course2") {
+                    populateBatchOptions(["Batch4", "Batch5", "Batch6"]);
+                } else if (selectedCourse === "Course3") {
+                    populateBatchOptions(["Batch7", "Batch8", "Batch9"]);
+                }
+            });   
+            function populateBatchOptions(batches) {
+                batches.forEach(function(batch) {
+                    var option = document.createElement("option");
+                    option.value = batch;
+                    option.textContent = batch;
+                    batchSelect.appendChild(option);
+                });
+            }
+        });
+    </script>    
+</body>
+</html>

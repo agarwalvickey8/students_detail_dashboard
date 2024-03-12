@@ -1,0 +1,73 @@
+{% extends "admin/change_list.html" %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .upload-form {
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 30px;
+    }
+    .upload-form label {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px 16px;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-bottom: 10px;
+    }
+    .upload-form label:hover {
+        background-color: #0056b3;
+    }
+    .upload-form button {
+        background-color: #007bff;
+        color: #fff;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        margin: 10px;
+    }
+    .upload-form button:hover {
+        background-color: #0056b3;
+    }
+    .file-input {
+        display: none;
+    }
+
+    .file-label {
+        margin-bottom: 10px;
+    }
+    .file-span {
+        margin-bottom: 10px;
+    }
+</style>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const fileInput = document.getElementById("excel_file");
+        const fileSpan = document.querySelector(".file-span");
+        fileInput.addEventListener("change", function() {
+            if (this.files.length > 0) {
+                fileSpan.textContent = this.files[0].name;
+            } else {
+                fileSpan.textContent = "No file chosen";
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% block object-tools-items %}
+{{ block.super }}
+<li>
+    <form class="upload-form" action="{% url 'admin:upload_excel' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <label for="excel_file" class="file-label">Choose Excel File</label>
+        <input type="file" id="excel_file" name="excel_file" class="file-input">
+        <span class="file-span">No file chosen</span>
+        <button type="submit">Upload</button>
+    </form>
+</li>
+{% endblock %}
+{% block sidebar %}
+{{ block.super }}
+{% endblock %}
