@@ -118,3 +118,17 @@ def edit_neet_registration(request, neet_registration_id):
 def logout(request):
     django_logout(request)
     return redirect('/')
+
+def update_neet_application(request):  
+    if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
+        registration_id = request.POST.get('registration_id')
+        neet_application = request.POST.get('neet_application')
+        try:
+            neet_registration = NEETRegistration.objects.get(id=registration_id)
+            neet_registration.NEETApplication = neet_application
+            neet_registration.save()
+            return JsonResponse({'success': True})
+        except NEETRegistration.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'NEETRegistration not found'})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method or not AJAX'})

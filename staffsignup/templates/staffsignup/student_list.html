@@ -162,21 +162,23 @@
             <table>
                 <thead>
                     <tr>
+                        <th>Student id</th>
                         <th>Student Name</th>
                         <th>Course</th>
                         <th>Batch</th>
                         <th>Coaching Roll No.</th>
                         <th>Coaching Registeration No.</th>
-                        <th>NEET Application No.</th>
+                        <th>NEETApplication</th>
                         <th>Mobile No.</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for neet_registration in neet_registeration_data %}
-                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" data-registration-id="{{ neet_registration.id }}">
+                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" id="{{ neet_registration.id}}">
                         {% csrf_token %}
                         <tr>
+                            <td>{{ neet_registration.id }}</td>
                             <td>{{ neet_registration.StudentDetail.Name }}</td>
                             <td>{{ neet_registration.StudentDetail.Course}}</td>
                             <td>{{ neet_registration.StudentDetail.Batch }}</td>
@@ -196,6 +198,52 @@
             {% endif %}
         </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('input[name="NEETApplication"]').on('input', function() {
+                var neetApplicationValue = $(this).val();
+                var closestForm = $(this).prop('form');
+                var neetRegistrationId = closestForm.id;
+                $.ajax({
+                    url: '/update_neet_application/',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')  // Include CSRF token in the request headers
+                    },
+                    data: {
+                        neet_application: neetApplicationValue,
+                        registration_id: neetRegistrationId
+                    },
+                    success: function(response) {
+                        // Handle success response if needed
+                        console.log('NEET Application saved successfully');
+                    },
+                    error: function(xhr, status, error) {
+                        // Handle error if needed
+                        console.error('Error saving NEET Application:', error);
+                    }
+                });
+            });
+        });
+       
+        // Function to get CSRF token from cookie
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }        
+        </script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var courseSelect = document.getElementById("course-select");
