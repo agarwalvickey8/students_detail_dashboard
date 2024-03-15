@@ -162,7 +162,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Student id</th>
                         <th>Student Name</th>
                         <th>Course</th>
                         <th>Batch</th>
@@ -170,7 +169,6 @@
                         <th>Coaching Registeration No.</th>
                         <th>NEETApplication</th>
                         <th>Mobile No.</th>
-                        {% comment %} <th>Actions</th> {% endcomment %}
                     </tr>
                 </thead>
                 <tbody>
@@ -178,7 +176,6 @@
                     <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" id="{{ neet_registration.id}}">
                         {% csrf_token %}
                         <tr>
-                            <td>{{ neet_registration.id }}</td>
                             <td>{{ neet_registration.StudentDetail.Name }}</td>
                             <td>{{ neet_registration.StudentDetail.Course}}</td>
                             <td>{{ neet_registration.StudentDetail.Batch }}</td>
@@ -186,7 +183,6 @@
                             <td>{{ neet_registration.StudentDetail.CoachingRegisteration }}</td>
                             <td><input type="number" name="NEETApplication" value="{{ neet_registration.NEETApplication|default:'' }}"></td>
                             <td><input type="number" name="Mobile" value="{{neet_registration.Mobile|default:''}}"></td>
-                            {% comment %} <td><button type="submit" class="save-button">Save</button></td> {% endcomment %}
                         </tr>
                     </form>                    
                     {% endfor %}
