@@ -126,9 +126,10 @@ def update_neet_application(request):
 
         try:
             neet_registration = NEETRegistration.objects.get(id=registration_id)
-            # Update NEETApplication value
-            neet_registration.NEETApplication = neet_application
-            # Save the changes
+            if neet_application.strip():
+                neet_registration.NEETApplication = neet_application
+            else:
+                neet_registration.NEETApplication = None 
             neet_registration.save()
             return JsonResponse({'success': True})
         except NEETRegistration.DoesNotExist:
@@ -139,13 +140,14 @@ def update_neet_application(request):
 def update_mobile(request):
     if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
         registration_id = request.POST.get('registration_id')
-        mobile = request.POST.get('mobile')  # Get the mobile number from POST data
+        mobile = request.POST.get('mobile')
         
         try:
             neet_registration = NEETRegistration.objects.get(id=registration_id)
-            # Update Mobile value
-            neet_registration.Mobile = mobile
-            # Save the changes
+            if mobile.strip():
+                neet_registration.Mobile = mobile
+            else:
+                neet_registration.Mobile = None
             neet_registration.save()
             return JsonResponse({'success': True})
         except NEETRegistration.DoesNotExist:
