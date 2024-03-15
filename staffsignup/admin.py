@@ -82,9 +82,15 @@ class StudentDetailsAdmin(admin.ModelAdmin):
             except Exception as e:
                 messages.error(request, f"Error reading Excel file: {str(e)}")
         return HttpResponseRedirect('../')
-    
+
+class NEETRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'NEETApplication', 'Mobile')
+
+    def student_name(self, obj):
+        return obj.StudentDetail.Name 
+
 admin.site.register(Branch)
 admin.site.register(StudentDetails, StudentDetailsAdmin)
 admin.site.register(Staff)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
-admin.site.register(NEETRegistration)
+admin.site.register(NEETRegistration, NEETRegistrationAdmin)

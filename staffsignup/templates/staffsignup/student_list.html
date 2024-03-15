@@ -167,14 +167,13 @@
                         <th>Batch</th>
                         <th>Coaching Roll No.</th>
                         <th>Coaching Registeration No.</th>
-                        <th>NEET Application No.</th>
+                        <th>NEETApplication</th>
                         <th>Mobile No.</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for neet_registration in neet_registeration_data %}
-                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" data-registration-id="{{ neet_registration.id }}">
+                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" id="{{ neet_registration.id}}">
                         {% csrf_token %}
                         <tr>
                             <td>{{ neet_registration.StudentDetail.Name }}</td>
@@ -184,7 +183,6 @@
                             <td>{{ neet_registration.StudentDetail.CoachingRegisteration }}</td>
                             <td><input type="number" name="NEETApplication" value="{{ neet_registration.NEETApplication|default:'' }}"></td>
                             <td><input type="number" name="Mobile" value="{{neet_registration.Mobile|default:''}}"></td>
-                            <td><button type="submit" class="save-button">Save</button></td>
                         </tr>
                     </form>                    
                     {% endfor %}
@@ -196,6 +194,71 @@
             {% endif %}
         </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('input[name="Mobile"]').on('input', function() {
+            var mobileValue = $(this).val();
+            var closestForm = $(this).prop('form');
+            var neetRegistrationId = closestForm.id;
+            $.ajax({
+                url: '/update_mobile/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: {
+                    mobile: mobileValue,
+                    registration_id: neetRegistrationId
+                },
+                success: function(response) {
+                    console.log('Mobile number saved successfully');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving Mobile number:', error);
+                }
+            });
+        });
+
+        $('input[name="NEETApplication"]').on('input', function() {
+            var neetApplicationValue = $(this).val();
+            var closestForm = $(this).prop('form');
+            var neetRegistrationId = closestForm.id;
+            $.ajax({
+                url: '/update_neet_application/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: {
+                    neet_application: neetApplicationValue,
+                    registration_id: neetRegistrationId
+                },
+                success: function(response) {
+                    console.log('NEET Application saved successfully');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving NEET Application:', error);
+                }
+            });
+        });
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var courseSelect = document.getElementById("course-select");

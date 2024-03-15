@@ -8,4 +8,6 @@ urlpatterns = [
     path('student-list/', views.student_list_view, name='student_list'),
     path('edit-neet-registration/<int:neet_registration_id>/', views.edit_neet_registration, name='edit_neet_registration'),
     path('logout/', views.logout, name='logout'),
+    path('update_neet_application/', views.update_neet_application, name='update_neet_application'),
+    path('update_mobile/', views.update_mobile, name='update_mobile'),
 ]
