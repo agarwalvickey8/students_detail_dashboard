@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 # settings.py
 
 
-import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,11 +25,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-j(o^4yf$py+v2)e7swja^@n9v6dlqm^4$d4e*_xbin$lcy&oas'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-# DEBUG = True
-DEBUG = False
+DEBUG = True
 
-# ALLOWED_HOSTS = []
-ALLOWED_HOSTS = ['.vercel.app','now.sh']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -83,11 +80,11 @@ WSGI_APPLICATION = 'studentsdata.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'freedb_gci_students',
-        'HOST': 'sql.freedb.tech',
+        'NAME': 'studentsdata',
+        'HOST': '127.0.0.1',
         'PORT': '3306',
-        'USER': 'freedb_vickey',
-        'PASSWORD':'37&KRxN@27rjFeH',
+        'USER': 'root',
+        'PASSWORD':'Vickey@gci',
     }
 }
 LOGIN_URL = '/'
@@ -132,6 +129,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
