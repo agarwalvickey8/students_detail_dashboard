@@ -80,13 +80,23 @@ WSGI_APPLICATION = 'studentsdata.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'studentsdata',
-        'HOST': '127.0.0.1',
+        'NAME': 'gci-students',
+        'HOST': 'db.azure.schoollog.in',
         'PORT': '3306',
-        'USER': 'root',
-        'PASSWORD':'Vickey@gci',
+        'USER': 'slmysqluser',
+        'PASSWORD':'wer45TY^&*()',
     }
 }
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'freedb_gci_students',
+#         'HOST': 'sql.freedb.tech',
+#         'PORT': '3306',
+#         'USER': 'freedb_vickey',
+#         'PASSWORD':'37&KRxN@27rjFeH',
+#     }
+# }
 LOGIN_URL = '/'
 
 # Password validation
