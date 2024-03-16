@@ -10,15 +10,20 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 # settings.py
-import environ
+from dotenv import load_dotenv
+import os
 
 
+load_dotenv()
 
 from pathlib import Path
 
 # Initialise environment variables
-env = environ.Env()
-environ.Env.read_env()
+DB_HOST = os.getenv("DATABASE_HOST")
+DB_USER = os.getenv("DATABASE_USER")
+DB_PASS = os.getenv("DATABASE_PASS")
+DB_NAME = os.getenv("DATABASE_NAME")
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,11 +99,11 @@ DATABASES = {
     # }
      'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': env('DATABASE_NAME'),
-        'HOST': env('DATABASE_HOST'),
+        'NAME': DB_NAME,
+        'HOST': DB_HOST,
         'PORT': '3306',
-        'USER': env('DATABASE_USER'),
-        'PASSWORD':env('DATABASE_PASS')
+        'USER': DB_USER,
+        'PASSWORD':DB_PASS
     }
 }
 
