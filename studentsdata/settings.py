@@ -43,7 +43,7 @@ SECRET_KEY = 'django-insecure-j(o^4yf$py+v2)e7swja^@n9v6dlqm^4$d4e*_xbin$lcy&oas
 DEBUG = False
 
 ALLOWED_HOSTS = [
-    "localhost"
+    "localhost",
     "gcistudents.dv1.azure.schoollog.in",    
 ]
 
