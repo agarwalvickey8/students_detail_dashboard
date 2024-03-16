@@ -101,6 +101,7 @@ def student_list_view(request):
                 'batch': batch,
                 'batch_options': batch_options,
                 'fields': fields,
+                'aa' : aa
             })
         except Staff.DoesNotExist:
             return redirect('/')
