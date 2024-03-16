@@ -158,7 +158,7 @@
                 </tbody>
             </table>
             {% else %}
-            {% if neet_registeration_data %}
+            {% if selected_model_class %}
             <table>
                 <thead>
                     <tr>
@@ -167,24 +167,22 @@
                         <th>Batch</th>
                         <th>Coaching Roll No.</th>
                         <th>Coaching Registeration No.</th>
-                        <th>NEET Application No.</th>
+                        <th>NEETApplication</th>
                         <th>Mobile No.</th>
-                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for neet_registration in neet_registeration_data %}
-                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" data-registration-id="{{ neet_registration.id }}">
+                    {% for selected_model in selected_model_class %}
+                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' selected_model.id %}" id="{{ selected_model.id}}">
                         {% csrf_token %}
                         <tr>
-                            <td>{{ neet_registration.StudentDetail.Name }}</td>
-                            <td>{{ neet_registration.StudentDetail.Course}}</td>
-                            <td>{{ neet_registration.StudentDetail.Batch }}</td>
-                            <td>{{ neet_registration.StudentDetail.CoachingRoll }}</td>
-                            <td>{{ neet_registration.StudentDetail.CoachingRegisteration }}</td>
-                            <td><input type="number" name="NEETApplication" value="{{ neet_registration.NEETApplication|default:'' }}"></td>
-                            <td><input type="number" name="Mobile" value="{{neet_registration.Mobile|default:''}}"></td>
-                            <td><button type="submit" class="save-button">Save</button></td>
+                            <td>{{ selected_model.StudentDetail.Name }}</td>
+                            <td>{{ selected_model.StudentDetail.Course}}</td>
+                            <td>{{ selected_model.StudentDetail.Batch }}</td>
+                            <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
+                            <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
+                            <td><input type="number" name="NEETApplication" value="{{ selected_model.NEETApplication|default:'' }}"></td>
+                            <td><input type="number" name="Mobile" value="{{selected_model.Mobile|default:''}}"></td>
                         </tr>
                     </form>                    
                     {% endfor %}
@@ -196,6 +194,51 @@
             {% endif %}
         </div>
     </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('input[name="Mobile"], input[name="{{ aa }}"]').on('input', function() {
+            var inputName = $(this).attr('name');
+            var inputValue = $(this).val();
+            var closestForm = $(this).prop('form');
+            var FormId = closestForm.id;
+            $.ajax({
+                url: '/update_field/',
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                data: {
+                    registration_id: FormId,
+                    field_name: inputName === 'Mobile' ? 'Mobile' : "{{aa}}",
+                    field_value: inputValue,
+                    selected_model_name: '{{ selected_model_name }}'
+                },
+                success: function(response) {
+                    console.log(inputName === 'Mobile' ? 'Mobile number saved successfully' : 'NEET Application saved successfully');
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error saving ' + (inputName === 'Mobile' ? 'Mobile number' : 'NEET Application') + ':', error);
+                }
+            });
+        });        
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             var courseSelect = document.getElementById("course-select");

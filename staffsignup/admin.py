@@ -1,5 +1,5 @@
 from django.contrib import admin, messages
-from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StudentDetails
+from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StudentDetails, JEEMAIN1Registration
 from django import forms
 from django.http import HttpResponseRedirect
 import pandas as pd
@@ -82,9 +82,21 @@ class StudentDetailsAdmin(admin.ModelAdmin):
             except Exception as e:
                 messages.error(request, f"Error reading Excel file: {str(e)}")
         return HttpResponseRedirect('../')
+
+class NEETRegistrationAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'NEETApplication', 'Mobile')
+
+    def student_name(self, obj):
+        return obj.StudentDetail.Name
     
+class JEEMAIN1RegistrationAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'JEEMAIN1Application', 'Mobile')
+    def student_name(self, obj):
+        return obj.StudentDetails.Name
+
 admin.site.register(Branch)
 admin.site.register(StudentDetails, StudentDetailsAdmin)
 admin.site.register(Staff)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
-admin.site.register(NEETRegistration)
+admin.site.register(NEETRegistration, NEETRegistrationAdmin)
+admin.site.register(JEEMAIN1Registration, JEEMAIN1RegistrationAdmin)
