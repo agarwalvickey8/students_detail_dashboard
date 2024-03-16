@@ -10,9 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 # settings.py
+import environ
+
 
 
 from pathlib import Path
+
+# Initialise environment variables
+env = environ.Env()
+environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -78,25 +84,24 @@ WSGI_APPLICATION = 'studentsdata.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': 'gci-students',
+    #     'HOST': 'db.azure.schoollog.in',
+    #     'PORT': '3306',
+    #     'USER': 'slmysqluser',
+    #     'PASSWORD':"",
+    # }
+     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'gci-students',
-        'HOST': 'db.azure.schoollog.in',
+        'NAME': env('DATABASE_NAME'),
+        'HOST': env('DATABASE_HOST'),
         'PORT': '3306',
-        'USER': 'slmysqluser',
-        'PASSWORD':'wer45TY^&*()',
+        'USER': env('DATABASE_USER'),
+        'PASSWORD':env('DATABASE_PASS')
     }
 }
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'freedb_gci_students',
-#         'HOST': 'sql.freedb.tech',
-#         'PORT': '3306',
-#         'USER': 'freedb_vickey',
-#         'PASSWORD':'37&KRxN@27rjFeH',
-#     }
-# }
+
 LOGIN_URL = '/'
 
 # Password validation
