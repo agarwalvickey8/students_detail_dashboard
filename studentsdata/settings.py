@@ -12,6 +12,10 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 # settings.py
 from dotenv import load_dotenv
 import os
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(_file_)))
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
 load_dotenv()
