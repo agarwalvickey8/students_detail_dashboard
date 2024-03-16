@@ -1,10 +1,11 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
-from .models import DisplayPreference, Staff, StudentDetails, NEETRegistration
+from .models import DisplayPreference, Staff, StudentDetails, NEETRegistration, JEEMAIN1Registration
 from .forms import LoginForm, NEETRegistrationForm
 from django.contrib.auth import logout as django_logout
 from urllib.parse import urlencode
 from django.urls import reverse
+from django.apps import apps
 
 def login_view(request):
     error_message = None
@@ -34,8 +35,8 @@ def student_list_view(request):
         try:
             staff = Staff.objects.get(id=user_id)
             student_details_data = None
-            neet_registeration_data = None
             selected_model_name = None
+            selected_model_class = None
             registration_number = request.GET.get('registration_number')
             roll_number = request.GET.get('roll_number')
             course = request.GET.get('course')
@@ -49,30 +50,32 @@ def student_list_view(request):
                 selected_model_name = preference.model_name
             except DisplayPreference.DoesNotExist:
                 pass
-            if selected_model_name == 'NEETRegistration':
-                neet_registeration_data = NEETRegistration.objects.filter(StudentDetail__Branch=staff.Branch)
-            else:
+            selected_model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
+            if selected_model_name == 'StudentDetails':
                 student_details_data = StudentDetails.objects.filter(Branch=staff.Branch)
+            else:
+                fields = [field for field in selected_model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail'] ]
+                selected_model_class = selected_model_class.objects.filter(StudentDetail__Branch=staff.Branch)
             if registration_number:
-                if selected_model_name == 'NEETRegistration':
-                    neet_registeration_data = neet_registeration_data.filter(StudentDetail__CoachingRegisteration=registration_number)
-                else:
+                if selected_model_name == 'StudentDetails':
                     student_details_data = student_details_data.filter(CoachingRegisteration=registration_number)
+                else:
+                    selected_model_class = selected_model_class.filter(StudentDetail__CoachingRegisteration=registration_number)
             if roll_number:
-                if selected_model_name == 'NEETRegistration':
-                    neet_registeration_data = neet_registeration_data.filter(StudentDetail__CoachingRoll=roll_number)
-                else:
+                if selected_model_name == 'StudentDetails':
                     student_details_data = student_details_data.filter(CoachingRoll=roll_number)
+                else:
+                    selected_model_class = selected_model_class.filter(StudentDetail__CoachingRoll=roll_number)                    
             if course:
-                if selected_model_name == 'NEETRegistration':
-                    neet_registeration_data = neet_registeration_data.filter(StudentDetail__Course=course)
-                else:
+                if selected_model_name == 'StudentDetails':
                     student_details_data = student_details_data.filter(Course=course)
-            if batch:
-                if selected_model_name == 'NEETRegistration':
-                    neet_registeration_data = neet_registeration_data.filter(StudentDetail__Batch=batch)
                 else:
+                    selected_model_class = selected_model_class.filter(StudentDetail__Course=course)
+            if batch:
+                if selected_model_name == 'StudentDetails':
                     student_details_data = student_details_data.filter(Batch=batch)
+                else:
+                    selected_model_class = selected_model_class.filter(StudentDetail__Batch=batch)                   
             batch_options = []
             if course:
                 if course == "Spartan Batch":
@@ -87,15 +90,17 @@ def student_list_view(request):
                 'registration_number': registration_number,
                 'roll_number': roll_number,
             }
+            aa = "NEETApplication"
             return render(request, 'staffsignup/student_list.html', {
                 'student_details_data': student_details_data,
-                'neet_registeration_data': neet_registeration_data,
+                'selected_model_class': selected_model_class,
                 'selected_model_name': selected_model_name,
                 'registration_number':registration_number,
                 'roll_number':roll_number,
                 'course': course,
                 'batch': batch,
                 'batch_options': batch_options,
+                'fields': fields,
             })
         except Staff.DoesNotExist:
             return redirect('/')
@@ -118,39 +123,23 @@ def edit_neet_registration(request, neet_registration_id):
 def logout(request):
     django_logout(request)
     return redirect('/')
-
-def update_neet_application(request):
+ 
+def update_field(request):
     if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
         registration_id = request.POST.get('registration_id')
-        neet_application = request.POST.get('neet_application')
-
+        field_name = request.POST.get('field_name')
+        field_value = request.POST.get('field_value')
+        selected_model_name = request.POST.get('selected_model_name')
+        model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
         try:
-            neet_registration = NEETRegistration.objects.get(id=registration_id)
-            if neet_application.strip():
-                neet_registration.NEETApplication = neet_application
+            obj = model_class.objects.get(id=registration_id)
+            if field_value.strip():
+                setattr(obj, field_name, field_value)
             else:
-                neet_registration.NEETApplication = None 
-            neet_registration.save()
+                setattr(obj, field_name, None)
+            obj.save()
             return JsonResponse({'success': True})
-        except NEETRegistration.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'NEETRegistration not found'})
-    else:
-        return JsonResponse({'success': False, 'error': 'Invalid request method or not AJAX'})
-
-def update_mobile(request):
-    if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
-        registration_id = request.POST.get('registration_id')
-        mobile = request.POST.get('mobile')
-        
-        try:
-            neet_registration = NEETRegistration.objects.get(id=registration_id)
-            if mobile.strip():
-                neet_registration.Mobile = mobile
-            else:
-                neet_registration.Mobile = None
-            neet_registration.save()
-            return JsonResponse({'success': True})
-        except NEETRegistration.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'NEETRegistration not found'})
+        except model_class.DoesNotExist:
+            return JsonResponse({'success': False, 'error': f'{selected_model_name} not found'})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method or not AJAX'})

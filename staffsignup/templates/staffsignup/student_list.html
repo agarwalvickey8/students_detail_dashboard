@@ -158,7 +158,7 @@
                 </tbody>
             </table>
             {% else %}
-            {% if neet_registeration_data %}
+            {% if selected_model_class %}
             <table>
                 <thead>
                     <tr>
@@ -172,17 +172,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for neet_registration in neet_registeration_data %}
-                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' neet_registration.id %}" id="{{ neet_registration.id}}">
+                    {% for selected_model in selected_model_class %}
+                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' selected_model.id %}" id="{{ selected_model.id}}">
                         {% csrf_token %}
                         <tr>
-                            <td>{{ neet_registration.StudentDetail.Name }}</td>
-                            <td>{{ neet_registration.StudentDetail.Course}}</td>
-                            <td>{{ neet_registration.StudentDetail.Batch }}</td>
-                            <td>{{ neet_registration.StudentDetail.CoachingRoll }}</td>
-                            <td>{{ neet_registration.StudentDetail.CoachingRegisteration }}</td>
-                            <td><input type="number" name="NEETApplication" value="{{ neet_registration.NEETApplication|default:'' }}"></td>
-                            <td><input type="number" name="Mobile" value="{{neet_registration.Mobile|default:''}}"></td>
+                            <td>{{ selected_model.StudentDetail.Name }}</td>
+                            <td>{{ selected_model.StudentDetail.Course}}</td>
+                            <td>{{ selected_model.StudentDetail.Batch }}</td>
+                            <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
+                            <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
+                            <td><input type="number" name="NEETApplication" value="{{ selected_model.NEETApplication|default:'' }}"></td>
+                            <td><input type="number" name="Mobile" value="{{selected_model.Mobile|default:''}}"></td>
                         </tr>
                     </form>                    
                     {% endfor %}
@@ -197,51 +197,32 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('input[name="Mobile"]').on('input', function() {
-            var mobileValue = $(this).val();
+        $('input[name="Mobile"], input[name="{{ aa }}"]').on('input', function() {
+            var inputName = $(this).attr('name');
+            var inputValue = $(this).val();
             var closestForm = $(this).prop('form');
-            var neetRegistrationId = closestForm.id;
+            var FormId = closestForm.id;
+        
             $.ajax({
-                url: '/update_mobile/',
+                url: '/update_field/',
                 method: 'POST',
                 headers: {
                     'X-CSRFToken': getCookie('csrftoken')
                 },
                 data: {
-                    mobile: mobileValue,
-                    registration_id: neetRegistrationId
+                    registration_id: FormId,
+                    field_name: inputName === 'Mobile' ? 'Mobile' : "{{aa}}",
+                    field_value: inputValue,
+                    selected_model_name: '{{ selected_model_name }}'
                 },
                 success: function(response) {
-                    console.log('Mobile number saved successfully');
+                    console.log(inputName === 'Mobile' ? 'Mobile number saved successfully' : 'NEET Application saved successfully');
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error saving Mobile number:', error);
+                    console.error('Error saving ' + (inputName === 'Mobile' ? 'Mobile number' : 'NEET Application') + ':', error);
                 }
             });
-        });
-
-        $('input[name="NEETApplication"]').on('input', function() {
-            var neetApplicationValue = $(this).val();
-            var closestForm = $(this).prop('form');
-            var neetRegistrationId = closestForm.id;
-            $.ajax({
-                url: '/update_neet_application/',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                data: {
-                    neet_application: neetApplicationValue,
-                    registration_id: neetRegistrationId
-                },
-                success: function(response) {
-                    console.log('NEET Application saved successfully');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error saving NEET Application:', error);
-                }
-            });
-        });
+        });        
 
         function getCookie(name) {
             var cookieValue = null;
