@@ -38,7 +38,9 @@ SECRET_KEY = 'django-insecure-j(o^4yf$py+v2)e7swja^@n9v6dlqm^4$d4e*_xbin$lcy&oas
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "gcistudents.dv1.azure.schoollog.in",    
+]
 
 
 # Application definition
