@@ -8,8 +8,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 # settings.py
 import os
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
@@ -21,10 +21,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 from pathlib import Path
 
 # Initialise environment variables
-DB_HOST = os.getenv("DATABASE_HOST")
-DB_USER = os.getenv("DATABASE_USER")
-DB_PASS = os.getenv("DATABASE_PASS")
-DB_NAME = os.getenv("DATABASE_NAME")
+# DB_HOST = os.getenv("DATABASE_HOST")
+# DB_USER = os.getenv("DATABASE_USER")
+# DB_PASS = os.getenv("DATABASE_PASS")
+# DB_NAME = os.getenv("DATABASE_NAME")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -38,9 +38,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-j(o^4yf$py+v2)e7swja^@n9v6dlqm^4$d4e*_xbin$lcy&oas'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['http://gcistudents.dv1.azure.schoollog.in/']
+# ALLOWED_HOSTS = ['http://gcistudents.dv1.azure.schoollog.in/']
 
 
 # Application definition
@@ -101,11 +101,11 @@ DATABASES = {
     # }
      'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': DB_NAME,
-        'HOST': DB_HOST,
+        'NAME': 'studentsdata',
+        'HOST': 'localhost',
         'PORT': '3306',
-        'USER': DB_USER,
-        'PASSWORD':DB_PASS
+        'USER': 'root',
+        'PASSWORD':'Vickey@gci',
     }
 }
 
