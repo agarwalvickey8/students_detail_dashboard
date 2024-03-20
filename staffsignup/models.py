@@ -66,7 +66,7 @@ class NEETRegistration(models.Model):
         verbose_name_plural = "NEET Registrations"
         
 class JEEMAIN1Registration(models.Model):
-    StudentDetails = models.OneToOneField(StudentDetails, on_delete = models.CASCADE)
+    StudentDetail = models.OneToOneField(StudentDetails, on_delete = models.CASCADE)
     JEEMAIN1Application = models.BigIntegerField(blank = True, null = True)
     Mobile = models.BigIntegerField(blank = True, null = True)
     

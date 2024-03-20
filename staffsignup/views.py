@@ -54,7 +54,8 @@ def student_list_view(request):
             if selected_model_name == 'StudentDetails':
                 student_details_data = StudentDetails.objects.filter(Branch=staff.Branch)
             else:
-                fields = [field for field in selected_model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail'] ]
+                field_objects = [field for field in selected_model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail'] ]
+                fields = [field.verbose_name for field in field_objects]
                 selected_model_class = selected_model_class.objects.filter(StudentDetail__Branch=staff.Branch)
             if registration_number:
                 if selected_model_name == 'StudentDetails':
@@ -91,6 +92,13 @@ def student_list_view(request):
                 'roll_number': roll_number,
             }
             aa = "NEETApplication"
+            # field_values = {}
+            # for selected_model in selected_model_class:
+            #     for field_name in fields:
+            #         field_value = getattr(selected_model, field_name, None)
+            #         field_values[field_name] = field_value
+            # breakpoint()
+            
             return render(request, 'staffsignup/student_list.html', {
                 'student_details_data': student_details_data,
                 'selected_model_class': selected_model_class,
@@ -100,8 +108,9 @@ def student_list_view(request):
                 'course': course,
                 'batch': batch,
                 'batch_options': batch_options,
-                'fields': fields,
-                'aa' : aa
+                'fields': fields if selected_model_name != 'StudentDetails' else [],
+                'aa' : aa,
+                # 'field_values': field_values,
             })
         except Staff.DoesNotExist:
             return redirect('/')

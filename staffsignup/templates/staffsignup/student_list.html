@@ -145,6 +145,7 @@
                         <th>Student Name</th>
                         <th>Coaching Registration</th>
                         <th>Coaching Roll</th>
+                        <th>Coaching Registeration No.</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -153,6 +154,7 @@
                         <td>{{ student_detail.Name }}</td>
                         <td>{{ student_detail.CoachingRegisteration }}</td>
                         <td>{{ student_detail.CoachingRoll }}</td>
+                        <td>{{ student_detail.CoachingRegisteration }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -167,8 +169,9 @@
                         <th>Batch</th>
                         <th>Coaching Roll No.</th>
                         <th>Coaching Registeration No.</th>
-                        <th>NEETApplication</th>
-                        <th>Mobile No.</th>
+                        {% for field in fields %}
+                        <th>{{field}}</th>
+                        {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
@@ -181,8 +184,11 @@
                             <td>{{ selected_model.StudentDetail.Batch }}</td>
                             <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
                             <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
-                            <td><input type="number" name="NEETApplication" value="{{ selected_model.NEETApplication|default:'' }}"></td>
-                            <td><input type="number" name="Mobile" value="{{selected_model.Mobile|default:''}}"></td>
+                            {% for field_name in fields %}
+                            {% with attribute=selected_model.field_name %}
+                                <td><input type="number" name="{{ field_name }}" value="{{ attribute|default_if_none:'' }}"></td>
+                            {% endwith %}
+                        {% endfor %}
                         </tr>
                     </form>                    
                     {% endfor %}
