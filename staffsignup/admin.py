@@ -92,7 +92,7 @@ class NEETRegistrationAdmin(admin.ModelAdmin):
 class JEEMAIN1RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student_name', 'JEEMAIN1Application', 'Mobile')
     def student_name(self, obj):
-        return obj.StudentDetails.Name
+        return obj.StudentDetail.Name
 
 admin.site.register(Branch)
 admin.site.register(StudentDetails, StudentDetailsAdmin)

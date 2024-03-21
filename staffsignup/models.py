@@ -71,7 +71,7 @@ class JEEMAIN1Registration(models.Model):
     Mobile = models.BigIntegerField(blank = True, null = True)
     
     def __str__(self):
-        return self.StudentDetails.Name
+        return self.StudentDetail.Name
     
     class Meta:
         verbose_name = "JEE Main 1 Registrations"

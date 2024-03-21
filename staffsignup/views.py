@@ -91,14 +91,6 @@ def student_list_view(request):
                 'registration_number': registration_number,
                 'roll_number': roll_number,
             }
-            aa = "NEETApplication"
-            # field_values = {}
-            # for selected_model in selected_model_class:
-            #     for field_name in fields:
-            #         field_value = getattr(selected_model, field_name, None)
-            #         field_values[field_name] = field_value
-            # breakpoint()
-            
             return render(request, 'staffsignup/student_list.html', {
                 'student_details_data': student_details_data,
                 'selected_model_class': selected_model_class,
@@ -109,16 +101,14 @@ def student_list_view(request):
                 'batch': batch,
                 'batch_options': batch_options,
                 'fields': fields if selected_model_name != 'StudentDetails' else [],
-                'aa' : aa,
-                # 'field_values': field_values,
             })
         except Staff.DoesNotExist:
             return redirect('/')
     else:
         return redirect('/')
 
-def edit_neet_registration(request, neet_registration_id):
-    neet_registration = get_object_or_404(NEETRegistration, pk=neet_registration_id)
+def edit_registration(request, registration_id):
+    neet_registration = get_object_or_404(NEETRegistration, pk=registration_id)
     if request.method == 'POST':
         form = NEETRegistrationForm(request.POST, instance=neet_registration)
         if form.is_valid():
@@ -128,7 +118,7 @@ def edit_neet_registration(request, neet_registration_id):
             return redirect(redirect_url)
     else:
         form = NEETRegistrationForm(instance=neet_registration)
-    return render(request, 'edit_neet_registration.html', {'form': form})
+    return render(request, 'edit_registration.html', {'form': form})
 
 def logout(request):
     django_logout(request)

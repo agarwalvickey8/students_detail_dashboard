@@ -4,6 +4,5 @@ from django import template
 register = template.Library()
 
 @register.filter
-def get_attribute(obj, attr):
-    """Get attribute dynamically."""
-    return getattr(obj, attr, '')
+def lookup(obj, attr):
+    return getattr(obj, attr, None)

@@ -160,7 +160,8 @@
                 </tbody>
             </table>
             {% else %}
-            {% if selected_model_class %}
+            {% load custom_filters %}
+            {% if selected_model_class != 'StudentDetails' %}
             <table>
                 <thead>
                     <tr>
@@ -170,27 +171,26 @@
                         <th>Coaching Roll No.</th>
                         <th>Coaching Registeration No.</th>
                         {% for field in fields %}
-                        <th>{{field}}</th>
+                            <th>{{ field }}</th>
                         {% endfor %}
                     </tr>
                 </thead>
                 <tbody>
                     {% for selected_model in selected_model_class %}
-                    <form class="edit-form" method="post" action="{% url 'edit_neet_registration' selected_model.id %}" id="{{ selected_model.id}}">
-                        {% csrf_token %}
-                        <tr>
-                            <td>{{ selected_model.StudentDetail.Name }}</td>
-                            <td>{{ selected_model.StudentDetail.Course}}</td>
-                            <td>{{ selected_model.StudentDetail.Batch }}</td>
-                            <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
-                            <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
-                            {% for field_name in fields %}
-                            {% with attribute=selected_model.field_name %}
-                                <td><input type="number" name="{{ field_name }}" value="{{ attribute|default_if_none:'' }}"></td>
-                            {% endwith %}
-                        {% endfor %}
-                        </tr>
-                    </form>                    
+                        <form class="edit-form" method="post" action="{% url 'edit_registration' selected_model.id %}" id="{{ selected_model.id }}">
+                            {% csrf_token %}
+                            <tr>
+                                <td>{{ selected_model.StudentDetail.Name }}</td>
+                                <td>{{ selected_model.StudentDetail.Course }}</td>
+                                <td>{{ selected_model.StudentDetail.Batch }}</td>
+                                <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
+                                <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
+                                {% for field_name in fields %}
+                                    <td><input type="number" name="{{ field_name }}"  value="{{ selected_model|lookup:field_name|default_if_none:'' }}">
+                                    </td>
+                                {% endfor %}
+                            </tr>
+                        </form>
                     {% endfor %}
                 </tbody>
             </table>
@@ -203,11 +203,21 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
-        $('input[name="Mobile"], input[name="{{ aa }}"]').on('input', function() {
+        var dynamicFields = [{% for field in fields %}'{{ field }}',{% endfor %}];
+        function generateInputSelectors() {
+            var selectors = [];
+            dynamicFields.forEach(function(field) {
+                selectors.push('input[name="' + field + '"]');
+            });
+            return selectors.join(', ');
+        }
+
+        $(document).on('input', generateInputSelectors(), function(){
             var inputName = $(this).attr('name');
             var inputValue = $(this).val();
             var closestForm = $(this).prop('form');
             var FormId = closestForm.id;
+            var fieldName = inputName;
             $.ajax({
                 url: '/update_field/',
                 method: 'POST',
@@ -216,19 +226,18 @@
                 },
                 data: {
                     registration_id: FormId,
-                    field_name: inputName === 'Mobile' ? 'Mobile' : "{{aa}}",
+                    field_name: fieldName,
                     field_value: inputValue,
                     selected_model_name: '{{ selected_model_name }}'
                 },
                 success: function(response) {
-                    console.log(inputName === 'Mobile' ? 'Mobile number saved successfully' : 'NEET Application saved successfully');
+                    console.log('Field ' + fieldName + ' saved successfully');
                 },
                 error: function(xhr, status, error) {
-                    console.error('Error saving ' + (inputName === 'Mobile' ? 'Mobile number' : 'NEET Application') + ':', error);
+                    console.error('Error saving field ' + fieldName + ':', error);
                 }
             });
         });        
-
         function getCookie(name) {
             var cookieValue = null;
             if (document.cookie && document.cookie !== '') {
