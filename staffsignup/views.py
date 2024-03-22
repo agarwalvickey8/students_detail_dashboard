@@ -1,10 +1,8 @@
 from django.http import JsonResponse
-from django.shortcuts import get_object_or_404, render, redirect
-from .models import DisplayPreference, Staff, StudentDetails, NEETRegistration, JEEMAIN1Registration
-from .forms import LoginForm, NEETRegistrationForm
+from django.shortcuts import render, redirect
+from .models import DisplayPreference, Staff, StudentDetails
+from .forms import LoginForm
 from django.contrib.auth import logout as django_logout
-from urllib.parse import urlencode
-from django.urls import reverse
 from django.apps import apps
 
 def login_view(request):
@@ -29,6 +27,10 @@ def login_view(request):
         form = LoginForm()
     return render(request, 'staffsignup/login.html', {'form': form, 'error_message': error_message})
 
+def logout(request):
+    django_logout(request)
+    return redirect('/')
+ 
 def student_list_view(request):
     if 'user_id' in request.session:
         user_id = request.session['user_id']
@@ -107,23 +109,6 @@ def student_list_view(request):
     else:
         return redirect('/')
 
-def edit_registration(request, registration_id):
-    neet_registration = get_object_or_404(NEETRegistration, pk=registration_id)
-    if request.method == 'POST':
-        form = NEETRegistrationForm(request.POST, instance=neet_registration)
-        if form.is_valid():
-            form.save()
-            filter_params = request.session.get('filter_params', {})
-            redirect_url = reverse('student_list') + '?' + urlencode(filter_params)
-            return redirect(redirect_url)
-    else:
-        form = NEETRegistrationForm(instance=neet_registration)
-    return render(request, 'edit_registration.html', {'form': form})
-
-def logout(request):
-    django_logout(request)
-    return redirect('/')
- 
 def update_field(request):
     if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
         registration_id = request.POST.get('registration_id')

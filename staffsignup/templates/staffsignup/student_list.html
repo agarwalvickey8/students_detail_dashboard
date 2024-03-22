@@ -133,8 +133,8 @@
                         <option value="{{ batch_option }}" {% if batch_option == batch %} selected {% endif %}>{{ batch_option }}</option>
                         {% endfor %}
                     </select>
-                    <input type="text" name="registration_number" placeholder="Search by Registration Number" value="{{ registration_number }}">
                     <input type="text" name="roll_number" placeholder="Search by Roll Number" value="{{ roll_number }}">
+                    <input type="text" name="registration_number" placeholder="Search by Registration Number" value="{{ registration_number }}">
                     <button type="submit">Apply Filter</button>
                 </form>
             </div>
@@ -177,7 +177,7 @@
                 </thead>
                 <tbody>
                     {% for selected_model in selected_model_class %}
-                        <form class="edit-form" method="post" action="{% url 'edit_registration' selected_model.id %}" id="{{ selected_model.id }}">
+                        <form class="edit-form" method="post"  id="{{ selected_model.id }}">
                             {% csrf_token %}
                             <tr>
                                 <td>{{ selected_model.StudentDetail.Name }}</td>
