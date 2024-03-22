@@ -1,10 +1,7 @@
-# signals.py
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from .models import JEEMAIN1Registration, StudentDetails, NEETRegistration  # Import other related models
 
-# Define signal handlers
 @receiver(post_save, sender=StudentDetails)
 def create_related_records(sender, instance, created, **kwargs):
     """

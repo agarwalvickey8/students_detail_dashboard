@@ -93,10 +93,36 @@ class JEEMAIN1RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student_name', 'JEEMAIN1Application', 'Mobile')
     def student_name(self, obj):
         return obj.StudentDetail.Name
+class StaffAddForm(forms.ModelForm):
+    class Meta:
+        model = Staff
+        exclude = ['Username', 'Password']
 
+class StaffEditForm(forms.ModelForm):
+    class Meta:
+        model = Staff
+        fields = '__all__'
+
+class StaffAdmin(admin.ModelAdmin):
+    list_display = ['Name', 'Branch', 'Username', 'Password']
+    readonly_fields = ['Username']
+
+    def get_form(self, request, obj=None, **kwargs):
+        if obj:
+            kwargs['form'] = StaffEditForm
+        else:
+            kwargs['form'] = StaffAddForm
+        return super().get_form(request, obj, **kwargs)
+
+    def get_fieldsets(self, request, obj=None):
+        if obj:
+            return super().get_fieldsets(request, obj)
+        else:
+            return [(None, {'fields': ['Name', 'Branch']})]
+
+admin.site.register(Staff, StaffAdmin)
 admin.site.register(Branch)
 admin.site.register(StudentDetails, StudentDetailsAdmin)
-admin.site.register(Staff)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
 admin.site.register(NEETRegistration, NEETRegistrationAdmin)
 admin.site.register(JEEMAIN1Registration, JEEMAIN1RegistrationAdmin)
