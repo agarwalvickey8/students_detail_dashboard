@@ -51,7 +51,7 @@ def student_list_view(request):
                 preference = DisplayPreference.objects.get(staff=staff)
                 selected_model_name = preference.model_name
             except DisplayPreference.DoesNotExist:
-                pass
+                return render(request, 'staffsignup/login.html', {'error_message': 'Sorry, No Display Preference is assigned to you! Please conatact Gurukripa admin.'})
             selected_model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
             if selected_model_name == 'StudentDetails':
                 student_details_data = StudentDetails.objects.filter(Branch=staff.Branch)

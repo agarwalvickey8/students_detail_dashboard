@@ -4,7 +4,8 @@ from django import forms
 from django.http import HttpResponseRedirect
 import pandas as pd
 from django.urls import path
-
+from django.contrib import admin
+admin.site.site_header = 'Gurukripa  Administration'
 class DisplayPreferenceForm(forms.ModelForm):
     model_name = forms.ChoiceField(choices=[], label='Model Name')
     def __init__(self, *args, **kwargs):
@@ -21,10 +22,17 @@ class DisplayPreferenceForm(forms.ModelForm):
             model_choices.append((model_name, model_name))
         return model_choices
 
+
 class DisplayPreferenceAdmin(admin.ModelAdmin):
     form = DisplayPreferenceForm
-    list_display = ('staff', 'model_name')
 
+    def staff_username(self, obj):
+        return obj.staff.Username  # Assuming the username field is named 'Username' in the Staff model
+
+    staff_username.short_description = 'Staff Username'  # Optional: Customize the column header
+
+    list_display = ('staff_username', 'model_name')
+    
 class StudentDetailsAdmin(admin.ModelAdmin):
     def get_urls(self):
         urls = super().get_urls()
@@ -126,3 +134,4 @@ admin.site.register(StudentDetails, StudentDetailsAdmin)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
 admin.site.register(NEETRegistration, NEETRegistrationAdmin)
 admin.site.register(JEEMAIN1Registration, JEEMAIN1RegistrationAdmin)
+# admin.site.unregister(Group)

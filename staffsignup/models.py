@@ -1,7 +1,6 @@
+from django.db import models
 import random
 import string
-from django.db import models
-from django.contrib.auth.models import User
 class Branch(models.Model):
     Name = models.CharField(max_length = 100)
     def __str__(self):
@@ -17,36 +16,32 @@ class Staff(models.Model):
     Branch = models.ForeignKey(Branch, on_delete=models.CASCADE)
     
     def __str__(self):
-        return self.Name
+        return self.Username
 
     def generate_random_password(self):
         random_chars = ''.join(random.choices(string.ascii_letters + string.digits, k=3))
-        return f"{self.Username}{random_chars}"
+        return f"{random_chars}"
 
     def save(self, *args, **kwargs):
         if not self.id:
             base_username = f"{self.Branch.Name.lower().replace(' ', '_')}_{self.Name.lower().replace(' ', '_')}"
-            existing_usernames = User.objects.filter(username__startswith=base_username).values_list('username', flat=True)
+            existing_usernames = Staff.objects.filter(Username__startswith=base_username).values_list('Username', flat=True)
             if existing_usernames:
                 suffix = 1
                 new_username = f"{base_username}_{suffix}"
                 while new_username in existing_usernames:
                     suffix += 1
                     new_username = f"{base_username}_{suffix}"
-                username = new_username
+                self.Username = new_username
             else:
-                username = base_username
-            user = User.objects.create_user(username=username)
-            password = self.__str__() +'@'+self.generate_random_password()
-            user.set_password(password)
-            user.save()
-            self.Username = username
-            self.Password = password
+                self.Username = base_username
+            self.Password = self.__str__() + '@' + self.generate_random_password()
         super().save(*args, **kwargs)
     
     class Meta:
         verbose_name = "Staff"
         verbose_name_plural = "Staffs"
+        
 class DisplayPreference(models.Model):
     staff = models.ForeignKey('Staff', on_delete = models.CASCADE)
     model_name = models.CharField(max_length = 100)
