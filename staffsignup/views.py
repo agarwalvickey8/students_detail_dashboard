@@ -112,22 +112,15 @@ def student_list_view(request):
 def get_batch_options(request):
     course = request.GET.get('course')
     if course:
-        # Get the staff's branch
         user_id = request.session.get('user_id')
         try:
             staff = Staff.objects.get(id=user_id)
             staff_branch = staff.Branch
-
-            # Filter student details based on course and staff's branch
             student_details = StudentDetails.objects.filter(Course=course, Branch=staff_branch)
-
-            # Get distinct batches for the filtered student details
             batches = student_details.values_list('Batch', flat=True).distinct()
             batch_options = list(batches)
-
             return JsonResponse(batch_options, safe=False)
         except Staff.DoesNotExist:
-            # Handle the case where the staff doesn't exist
             return JsonResponse([], safe=False)
     else:
         return JsonResponse([], safe=False)
