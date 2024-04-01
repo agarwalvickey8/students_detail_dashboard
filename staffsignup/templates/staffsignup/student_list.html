@@ -109,12 +109,14 @@
         <div class="header">
             <h1>Students Detail Dashboard</h1>
             <div class="header-right">
-                <p>hii</p>
-                <form action="{% url 'logout' %}" method="post">
-                    {% csrf_token %}
-                    <button type="submit" class="logout-button">Logout</button>
-                </form>
-            </div>
+                <div class="user-info">
+                    <p>Hello, {{ staff_name }}</p>
+                    <form action="{% url 'logout' %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="logout-button">Logout</button>
+                    </form>
+                </div>
+            </div>            
         </div>
         <div class="content">
             <div class="model-name">
@@ -124,21 +126,18 @@
                 <form id="filter-form" method="get">
                     <select id="course-select" name="course" >
                         <option value="">Select Course</option>
-                        <option value="Spartan Batch" {% if course == "Spartan Batch" %} selected {% endif %}>Spartan Batch</option>
-                        <option value="Course2" {% if course == "Course2" %} selected {% endif %}>Course 2</option>
-                        <option value="Course3" {% if course == "Course3" %} selected {% endif %}>Course 3</option>
+                        {% for course, batches in batch_options.items %}
+                        <option name = "course" value="{{ course }}">{{ course }}</option>
+                        {% endfor %}
                     </select>
                     <select id="batch-select" name="batch">
                         <option value="">Select Batch</option>
-                        {% for batch_option in batch_options %}
-                        <option value="{{ batch_option }}" {% if batch_option == batch %} selected {% endif %}>{{ batch_option }}</option>
-                        {% endfor %}
                     </select>
                     <input type="text" name="roll_number" placeholder="Search by Roll Number" value="{{ roll_number }}">
-                    <input type="text" name="registration_number" placeholder="Search by Registration Number" value="{{ registration_number }}">
+                    <input type="text" name="registration_number" placeholder="Search by Registration Number" value = "{{registration_number}}">
                     <button type="submit">Apply Filter</button>
                 </form>
-            </div>
+            </div>            
             {% if selected_model_name == 'StudentDetails' %}
             <table>
                 <thead>
@@ -219,6 +218,22 @@
             var closestForm = $(this).prop('form');
             var FormId = closestForm.id;
             var fieldName = inputName;
+            if (fieldName === 'Mobile') {
+                $('#mobile-error').remove();
+                if (inputValue.trim().length !== 10 || !/^([4-9])\d{9}$/.test(inputValue.trim())) {
+                    $('<div id="mobile-error" style="color: red;">Mobile number must be 10 digits and start with a digit between 4 and 9</div>').insertBefore($(this));
+                    return;
+                }
+            }
+            if (fieldName === 'NEETApplication') {
+                $('#neet-error').remove();
+                if (inputValue.trim().length !== 12) {
+                    $('<div id="neet-error" style="color: red;">NEETApplication number must be 12 digits</div>').insertBefore($(this));
+                    return;
+                }
+            }
+            $('#mobile-error').remove();
+            $('#neet-error').remove();
             $.ajax({
                 url: '/update_field/',
                 method: 'POST',
@@ -254,31 +269,37 @@
             return cookieValue;
         }
     });
-</script>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var courseSelect = document.getElementById("course-select");
-            var batchSelect = document.getElementById("batch-select");
-            courseSelect.addEventListener("change", function() {
-                var selectedCourse = courseSelect.value;
-                batchSelect.innerHTML = '<option value="">Select Batch</option>';
-                if (selectedCourse === "Spartan Batch") {
-                    populateBatchOptions(["FE4", "Batch2", "Batch3"]);
-                } else if (selectedCourse === "Course2") {
-                    populateBatchOptions(["Batch4", "Batch5", "Batch6"]);
-                } else if (selectedCourse === "Course3") {
-                    populateBatchOptions(["Batch7", "Batch8", "Batch9"]);
-                }
-            });   
-            function populateBatchOptions(batches) {
-                batches.forEach(function(batch) {
-                    var option = document.createElement("option");
-                    option.value = batch;
-                    option.textContent = batch;
-                    batchSelect.appendChild(option);
-                });
+</script>  
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var courseSelect = document.getElementById("course-select");
+        var batchSelect = document.getElementById("batch-select");
+
+        courseSelect.addEventListener("change", function() {
+            var selectedCourse = courseSelect.value;
+            batchSelect.innerHTML = '<option value="">Select Batch</option>';
+
+            if (selectedCourse !== "") {
+                fetchBatchOptions(selectedCourse);
             }
         });
-    </script>    
+
+        function fetchBatchOptions(course) {
+            // Make an AJAX request to fetch batch options based on the selected course
+            fetch('/get_batch_options/?course=' + course)
+                .then(response => response.json())
+                .then(data => {
+                    // Populate batch options based on the response
+                    data.forEach(function(batch) {
+                        var option = document.createElement("option");
+                        option.value = batch;
+                        option.textContent = batch;
+                        batchSelect.appendChild(option);
+                    });
+                })
+                .catch(error => console.error('Error fetching batch options:', error));
+        }
+    });
+</script>
 </body>
 </html>

@@ -91,21 +91,13 @@ WSGI_APPLICATION = 'studentsdata.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'gci-students',
-    #     'HOST': 'db.azure.schoollog.in',
-    #     'PORT': '3306',
-    #     'USER': 'slmysqluser',
-    #     'PASSWORD':"",
-    # }
-     'default': {
+    'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'studentsdata',
+        'USER': 'root',
+        'PASSWORD': 'Vickey@gci',
         'HOST': 'localhost',
         'PORT': '3306',
-        'USER': 'root',
-        'PASSWORD':'Vickey@gci',
     }
 }
 

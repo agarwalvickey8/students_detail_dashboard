@@ -4,42 +4,43 @@
     {{ block.super }}
     <style>
         .upload-form {
-            display: flex;
-            flex-direction: column;
             margin-bottom: 30px;
+            text-align: center;
         }
-        .upload-form label {
+        .file-label {
             background-color: #007bff;
             color: #fff;
-            padding: 8px 16px;
-            border-radius: 5px;
+            padding: 4px 8px;
+            border-radius: 3px;
             cursor: pointer;
-            margin-bottom: 10px;
+            transition: background-color 0.3s;
+            display: inline-block;
+            font-size: 10px;
         }
-        .upload-form label:hover {
-            background-color: #0056b3;
-        }
-        .upload-form button {
-            background-color: #007bff;
-            color: #fff;
-            padding: 8px 16px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 10px;
-        }
-        .upload-form button:hover {
+        .file-label:hover {
             background-color: #0056b3;
         }
         .file-input {
             display: none;
         }
-
-        .file-label {
-            margin-bottom: 10px;
-        }
         .file-span {
-            margin-bottom: 10px;
+            display: block;
+            margin-top: 8px;
+            font-size: 10px;
+        }
+        .upload-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: background-color 0.3s;
+            font-size: 10px;
+        }
+        .upload-button:hover {
+            background-color: #0056b3;
         }
     </style>
     <script>
@@ -65,12 +66,9 @@
         <form class="upload-form" action="{% url 'admin:upload_excel' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <label for="excel_file" class="file-label">Choose Excel File</label>
-            <input type="file" id="excel_file" name="excel_file" class="file-input">
+            <input type="file" id="excel_file" name="excel_file" class="file-input" accept=".xlsx">
             <span class="file-span">No file chosen</span>
-            <button type="submit">Upload</button>
+            <button type="submit" class="upload-button">Upload</button>
         </form>
     </li>
-{% endblock %}
-{% block sidebar %}
-    {{ block.super }}
 {% endblock %}

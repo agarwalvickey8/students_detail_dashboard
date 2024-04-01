@@ -6,6 +6,12 @@ import pandas as pd
 from django.urls import path
 from django.contrib import admin
 admin.site.site_header = 'Gurukripa  Administration'
+
+class BranchAdmin(admin.ModelAdmin):
+    list_display = ('id', 'Name')  # Show the Branch ID and Name in the list
+    search_fields = ('id', 'Name')  # Enable searching by Branch ID and Name
+
+
 class DisplayPreferenceForm(forms.ModelForm):
     model_name = forms.ChoiceField(choices=[], label='Model Name')
     def __init__(self, *args, **kwargs):
@@ -129,7 +135,7 @@ class StaffAdmin(admin.ModelAdmin):
             return [(None, {'fields': ['Name', 'Branch']})]
 
 admin.site.register(Staff, StaffAdmin)
-admin.site.register(Branch)
+admin.site.register(Branch, BranchAdmin)
 admin.site.register(StudentDetails, StudentDetailsAdmin)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
 admin.site.register(NEETRegistration, NEETRegistrationAdmin)

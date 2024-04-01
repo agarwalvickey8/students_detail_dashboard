@@ -79,20 +79,18 @@ def student_list_view(request):
                     student_details_data = student_details_data.filter(Batch=batch)
                 else:
                     selected_model_class = selected_model_class.filter(StudentDetail__Batch=batch)                   
-            batch_options = []
-            if course:
-                if course == "Spartan Batch":
-                    batch_options = ["FE4", "Batch2", "Batch3"]
-                elif course == "Course2":
-                    batch_options = ["Batch4", "Batch5", "Batch6"]
-                elif course == "Course3":
-                    batch_options = ["Batch7", "Batch8", "Batch9"]
+            all_courses = StudentDetails.objects.values_list('Course', flat=True).distinct()
+            batch_options = {}
+            for course in all_courses:
+                batches = StudentDetails.objects.filter(Course=course).values_list('Batch', flat=True).distinct()
+                batch_options[course] = list(batches)
             request.session['filter_params'] = {
                 'course': course,
                 'batch': batch,
                 'registration_number': registration_number,
                 'roll_number': roll_number,
             }
+            staff_name = staff.Name
             return render(request, 'staffsignup/student_list.html', {
                 'student_details_data': student_details_data,
                 'selected_model_class': selected_model_class,
@@ -102,12 +100,37 @@ def student_list_view(request):
                 'course': course,
                 'batch': batch,
                 'batch_options': batch_options,
+                'all_courses': all_courses,
                 'fields': fields if selected_model_name != 'StudentDetails' else [],
+                'staff_name': staff_name  
             })
         except Staff.DoesNotExist:
             return redirect('/')
     else:
         return redirect('/')
+    
+def get_batch_options(request):
+    course = request.GET.get('course')
+    if course:
+        # Get the staff's branch
+        user_id = request.session.get('user_id')
+        try:
+            staff = Staff.objects.get(id=user_id)
+            staff_branch = staff.Branch
+
+            # Filter student details based on course and staff's branch
+            student_details = StudentDetails.objects.filter(Course=course, Branch=staff_branch)
+
+            # Get distinct batches for the filtered student details
+            batches = student_details.values_list('Batch', flat=True).distinct()
+            batch_options = list(batches)
+
+            return JsonResponse(batch_options, safe=False)
+        except Staff.DoesNotExist:
+            # Handle the case where the staff doesn't exist
+            return JsonResponse([], safe=False)
+    else:
+        return JsonResponse([], safe=False)
 
 def update_field(request):
     if request.method == 'POST' and request.headers.get('X_REQUESTED_WITH') == 'XMLHttpRequest':
@@ -128,3 +151,4 @@ def update_field(request):
             return JsonResponse({'success': False, 'error': f'{selected_model_name} not found'})
     else:
         return JsonResponse({'success': False, 'error': 'Invalid request method or not AJAX'})
+    

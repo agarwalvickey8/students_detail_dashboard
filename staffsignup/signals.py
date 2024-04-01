@@ -11,4 +11,4 @@ def create_related_records(sender, instance, created, **kwargs):
         if instance.CourseType == 'NEET':
             NEETRegistration.objects.create(StudentDetail=instance, NEETApplication=None, Mobile=None)
         elif instance.CourseType == 'JEE':
-            JEEMAIN1Registration.objects.create(StudentDetails = instance, JEEMAIN1Application = None, Mobile = None)
+            JEEMAIN1Registration.objects.create(StudentDetail = instance, JEEMAIN1Application = None, Mobile = None)
