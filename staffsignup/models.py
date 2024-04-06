@@ -51,25 +51,30 @@ class DisplayPreference(models.Model):
         verbose_name_plural = "Display Preferences"
         
 class StudentDetails(models.Model):
-    CoachingRegisteration = models.CharField(max_length = 100)
-    CoachingRoll = models.CharField(max_length = 100)
+    CoachingRegisteration = models.BigIntegerField()
+    CoachingRoll = models.BigIntegerField()
     Name = models.CharField(max_length = 100)
-    FatherName = models.CharField(max_length = 100)
+    FatherName = models.CharField(max_length = 100, blank=True)
     MotherName = models.CharField(max_length = 100)
+    PrimaryNumber = models.CharField(max_length=10, blank=True, null=True)
+    SecondaryNumber = models.CharField(max_length=10, blank=True, null=True)
+    AdditionalNumber = models.CharField(max_length=10, blank=True, null=True)
+    WhatsappNumber = models.CharField(max_length=10, blank=True, null=True)
     Course = models.CharField(max_length = 100)
     CourseId = models.IntegerField()
     Batch = models.CharField(max_length = 100)
     Medium = models.CharField(max_length = 100)
-    DOB = models.DateField()
+    DOB = models.DateField(blank=True, null=True)
     Gender = models.CharField(max_length = 100)
     Category = models.CharField(max_length = 100)
     Address = models.CharField(max_length = 500)
     Tehsil = models.CharField(max_length = 100)
     District = models.CharField(max_length = 100)
     State = models.CharField(max_length = 100)
-    PreviousRoll = models.CharField(max_length = 100)
-    CourseType = models.CharField(max_length = 100)
-    Branch = models.ForeignKey(Branch, on_delete = models.CASCADE)  # Add default=None here
+    Pincode = models.CharField(max_length = 10, blank=True, null=True)
+    PreviousRoll = models.CharField(max_length = 100, blank = True, null=True)
+    Exam = models.CharField(max_length = 100)
+    Branch = models.ForeignKey(Branch, on_delete = models.CASCADE)
     
     def __str__(self):
         return self.Name

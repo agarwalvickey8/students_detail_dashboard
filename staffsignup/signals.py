@@ -8,7 +8,7 @@ def create_related_records(sender, instance, created, **kwargs):
     Signal handler to create related records when a new StudentDetails instance is created.
     """
     if created:
-        if instance.CourseType == 'NEET':
+        if instance.Exam == 'NEET':
             NEETRegistration.objects.create(StudentDetail=instance, NEETApplication=None, Mobile=None)
-        elif instance.CourseType == 'JEE':
+        elif instance.Exam == 'JEE':
             JEEMAIN1Registration.objects.create(StudentDetail = instance, JEEMAIN1Application = None, Mobile = None)
