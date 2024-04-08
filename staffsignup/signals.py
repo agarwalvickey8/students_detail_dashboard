@@ -9,6 +9,6 @@ def create_related_records(sender, instance, created, **kwargs):
     """
     if created:
         if instance.Exam == 'NEET':
-            NEETRegistration.objects.create(StudentDetail=instance, NEETApplication=None, Mobile=None)
+            NEETRegistration.objects.create(StudentDetail=instance, NEETApplication=None, DOB=None, Category = None)
         elif instance.Exam == 'JEE':
             JEEMAIN1Registration.objects.create(StudentDetail = instance, JEEMAIN1Application = None, Mobile = None)

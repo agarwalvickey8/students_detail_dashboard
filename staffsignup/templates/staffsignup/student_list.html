@@ -165,11 +165,9 @@
             <table>
                 <thead>
                     <tr>
-                        <th>Student Name</th>
-                        <th>Course</th>
-                        <th>Batch</th>
                         <th>Coaching Roll No.</th>
-                        <th>Coaching Registeration No.</th>
+                        <th>Student Name</th>
+                        <th>Father's Name</th>
                         {% for field in fields %}
                             <th>{{ field }}</th>
                         {% endfor %}
@@ -177,21 +175,24 @@
                 </thead>
                 <tbody>
                     {% for selected_model in selected_model_class %}
-                        <form class="edit-form" method="post"  id="{{ selected_model.id }}">
-                            {% csrf_token %}
-                            <tr>
-                                <td>{{ selected_model.StudentDetail.Name }}</td>
-                                <td>{{ selected_model.StudentDetail.Course }}</td>
-                                <td>{{ selected_model.StudentDetail.Batch }}</td>
-                                <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
-                                <td>{{ selected_model.StudentDetail.CoachingRegisteration }}</td>
-                                {% for field_name in fields %}
-                                    <td><input type="number" name="{{ field_name }}"  value="{{ selected_model|lookup:field_name|default_if_none:'' }}">
-                                    </td>
-                                {% endfor %}
-                            </tr>
-                        </form>
-                    {% endfor %}
+                    <form class="edit-form" method="post" id="{{ selected_model.id }}">
+                        {% csrf_token %}
+                        <tr>
+                            <td>{{ selected_model.StudentDetail.CoachingRoll }}</td>
+                            <td>{{ selected_model.StudentDetail.Name }}</td>
+                            <td>{{ selected_model.StudentDetail.FatherName }}</td>
+                            {% for field_name in fields %}
+                                {% if field_name == 'DOB' %}
+                                    <td><input type="text" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" required oninput="formatDateInput(this)"></td>
+                                {% elif field_name == 'Category' %}
+                                    <td><input type="text" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}"></td>
+                                {% else %}
+                                    <td><input type="number" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}"></td>
+                                {% endif %}
+                            {% endfor %}
+                        </tr>
+                    </form>
+                {% endfor %}
                 </tbody>
             </table>
             {% else %}
@@ -200,76 +201,271 @@
             {% endif %}
         </div>
     </div>
+    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        var dynamicFields = [{% for field in fields %}'{{ field }}',{% endfor %}];
-        function generateInputSelectors() {
-            var selectors = [];
-            dynamicFields.forEach(function(field) {
-                selectors.push('input[name="' + field + '"]');
-            });
-            return selectors.join(', ');
-        }
-
-        $(document).on('input', generateInputSelectors(), function(){
-            var inputName = $(this).attr('name');
-            var inputValue = $(this).val();
-            var closestForm = $(this).prop('form');
-            var FormId = closestForm.id;
-            var fieldName = inputName;
-            if (fieldName === 'Mobile') {
-                $('#mobile-error').remove();
-                if (inputValue.trim().length !== 10 || !/^([4-9])\d{9}$/.test(inputValue.trim())) {
-                    $('<div id="mobile-error" style="color: red;">Mobile number must be 10 digits and start with a digit between 4 and 9</div>').insertBefore($(this));
-                    return;
-                }
+    <script>
+        $(document).ready(function() {
+            var dynamicFields = [{% for field in fields %}'{{ field }}',{% endfor %}];
+        
+            function generateInputSelectors() {
+                var selectors = [];
+                dynamicFields.forEach(function(field) {
+                    selectors.push('input[name="' + field + '"]');
+                });
+                return selectors.join(', ');
             }
-            if (fieldName === 'NEETApplication') {
-                $('#neet-error').remove();
-                if (inputValue.trim().length !== 12) {
-                    $('<div id="neet-error" style="color: red;">NEETApplication number must be 12 digits</div>').insertBefore($(this));
-                    return;
-                }
-            }
-            $('#mobile-error').remove();
-            $('#neet-error').remove();
-            $.ajax({
-                url: '/update_field/',
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                },
-                data: {
-                    registration_id: FormId,
-                    field_name: fieldName,
-                    field_value: inputValue,
-                    selected_model_name: '{{ selected_model_name }}'
-                },
-                success: function(response) {
-                    console.log('Field ' + fieldName + ' saved successfully');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error saving field ' + fieldName + ':', error);
-                }
-            });
-        });        
-        function getCookie(name) {
-            var cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                var cookies = document.cookie.split(';');
-                for (var i = 0; i < cookies.length; i++) {
-                    var cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
+        
+            $(document).on('input', generateInputSelectors(), function() {
+                var inputName = $(this).attr('name');
+                var inputValue = $(this).val();
+                var closestForm = $(this).prop('form');
+                var FormId = closestForm.id;
+                var fieldName = inputName;
+        
+                // Remove existing error messages
+                $('#' + fieldName.toLowerCase() + '-error').remove();
+        
+                // Validate Mobile field
+                if (fieldName === 'Mobile') {
+                    if (inputValue.trim().length !== 10 || !/^([4-9])\d{9}$/.test(inputValue.trim())) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Mobile number must be 10 digits and start with a digit between 4 and 9</div>').insertBefore($(this));
+                        return;
                     }
                 }
+        
+                // Validate NEETApplication field
+                if (fieldName === 'NEETApplication' || fieldName === 'JEEMAIN1Application') {
+                    if (inputValue.trim().length !== 12) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">NEETApplication number must be 12 digits</div>').insertBefore($(this));
+                        return;
+                    }
+                }
+        
+                // Validate DOB field format or allow it to be blank
+                if (fieldName === 'DOB') {
+                    if (inputValue.trim() !== '' && !/^\d{2}\/\d{2}\/\d{4}$/.test(inputValue)) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Please enter DOB in dd/mm/yyyy format</div>').insertBefore($(this));
+                        return;
+                    }
+                    var dateParts = inputValue.split('/');
+                    if (dateParts.length === 3) {
+                        var year = parseInt(dateParts[2], 10);
+                        if (year < 1990 || year > 2009) {
+                            $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">DOB must be between 01-01-1990 and 31-12-2009</div>').insertBefore($(this));
+                            return;
+                        }
+                    }
+                }
+        
+                // Perform AJAX request to update field value
+                $.ajax({
+                    url: '/update_field/',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                    data: {
+                        registration_id: FormId,
+                        field_name: fieldName,
+                        field_value: (inputValue.trim() === '' && fieldName !== 'Category') ? null : ((fieldName === 'DOB') ? convertDateFormat(inputValue) : inputValue),
+                        selected_model_name: '{{ selected_model_name }}'
+                    },
+                    success: function(response) {
+                        console.log('Field ' + fieldName + ' saved successfully');
+                    },
+                    error: function(xhr, status, error) {
+                        console.error('Error saving field ' + fieldName + ':', error);
+                    }
+                });
+            });
+            // Handle keypress events for selecting categories from suggestions and applying tab to fill category automatically
+           // Handle keypress events for selecting categories from suggestions and applying tab to fill category automatically
+// Handle keypress events for selecting categories from suggestions and applying tab to fill category automatically
+        $(document).on('keydown', 'input[name="Category"]', function(e) {
+            var code = e.keyCode || e.which;
+            if (code === 9 || code === 13) { // Tab or Enter key pressed
+                var suggestedCategory = $(this).val().toUpperCase(); // Get the current input value
+                var categories = suggestCategory(suggestedCategory); // Check if the input matches any suggested categories
+                if (categories.length > 0) {
+                    $(this).val(categories[0]); // Fill the input with the first suggested category
+                    $('#category-message').remove();
+                    $('#category-suggestions').remove();
+                    // Perform AJAX request to update field value only if the category is not empty
+                    var inputName = $(this).attr('name');
+                    var inputValue = $(this).val();
+                    if (inputValue.trim() !== '') {
+                        var closestForm = $(this).prop('form');
+                        var FormId = closestForm.id;
+                        var fieldName = inputName;
+                        $.ajax({
+                            url: '/update_field/',
+                            method: 'POST',
+                            headers: {
+                                'X-CSRFToken': getCookie('csrftoken')
+                            },
+                            data: {
+                                registration_id: FormId,
+                                field_name: fieldName,
+                                field_value: inputValue,
+                                selected_model_name: '{{ selected_model_name }}'
+                            },
+                            success: function(response) {
+                                console.log('Field ' + fieldName + ' saved successfully');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error('Error saving field ' + fieldName + ':', error);
+                            }
+                        });
+                    }
+                } else if (suggestedCategory.trim() === '') {
+                    // If the input is blank, allow it and proceed
+                    $('#category-message').remove();
+                    $('#category-suggestions').remove();
+                    // Perform AJAX request to update field value with empty value
+                    var inputName = $(this).attr('name');
+                    var closestForm = $(this).prop('form');
+                    var FormId = closestForm.id;
+                    var fieldName = inputName;
+                    $.ajax({
+                        url: '/update_field/',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        data: {
+                            registration_id: FormId,
+                            field_name: fieldName,
+                            field_value: '', // Send empty value for the Category field
+                            selected_model_name: '{{ selected_model_name }}'
+                        },
+                        success: function(response) {
+                            console.log('Field ' + fieldName + ' saved successfully');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error saving field ' + fieldName + ':', error);
+                        }
+                    });
+                } else {
+                    $('<div id="category-message" style="color: red;">Please select a valid category</div>').insertAfter($(this));
+                    e.preventDefault(); // Prevent default behavior (tabbing to the next field)
+                }
             }
-            return cookieValue;
-        }
-    });
-</script>  
+        });
+
+            
+            // Handle blur event to automatically fill category if valid suggestion exists
+            $(document).on('blur', 'input[name="Category"]', function() {
+                var suggestedCategory = $(this).val().toUpperCase(); // Get the current input value
+                var categories = suggestCategory(suggestedCategory); // Check if the input matches any suggested categories
+                if (categories.length > 0) {
+                    $(this).val(categories[0]); // Fill the input with the first suggested category
+                    $('#category-message').remove();
+                    $('#category-suggestions').remove();
+                    // Perform AJAX request to update field value
+                    var inputName = $(this).attr('name');
+                    var inputValue = $(this).val();
+                    var closestForm = $(this).prop('form');
+                    var FormId = closestForm.id;
+                    var fieldName = inputName;
+                    $.ajax({
+                        url: '/update_field/',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        data: {
+                            registration_id: FormId,
+                            field_name: fieldName,
+                            field_value: inputValue,
+                            selected_model_name: '{{ selected_model_name }}'
+                        },
+                        success: function(response) {
+                            console.log('Field ' + fieldName + ' saved successfully');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error saving field ' + fieldName + ':', error);
+                        }
+                    });
+                } else if (suggestedCategory.trim() === '') {
+                    // If the input is blank, allow it and proceed
+                    $('#category-message').remove();
+                    $('#category-suggestions').remove();
+                    // Perform AJAX request to update field value with empty value
+                    var inputName = $(this).attr('name');
+                    var closestForm = $(this).prop('form');
+                    var FormId = closestForm.id;
+                    var fieldName = inputName;
+                    $.ajax({
+                        url: '/update_field/',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        data: {
+                            registration_id: FormId,
+                            field_name: fieldName,
+                            field_value: '',
+                            selected_model_name: '{{ selected_model_name }}'
+                        },
+                        success: function(response) {
+                            console.log('Field ' + fieldName + ' saved successfully');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error saving field ' + fieldName + ':', error);
+                        }
+                    });
+                }
+            });
+        
+            // Function to suggest categories based on user input
+            function suggestCategory(input) {
+                var categories = ['GENERAL', 'EWS', 'OBC', 'SC', 'ST'];
+                var suggestions = [];
+                categories.forEach(function(category) {
+                    if (category.startsWith(input)) {
+                        suggestions.push(category);
+                    }
+                });
+                return suggestions;
+            }
+            
+            // Function to convert date format from dd/mm/yyyy to yyyy-mm-dd
+            function convertDateFormat(inputDate) {
+                var parts = inputDate.split('/');
+                if (parts.length === 3) {
+                    return parts[2] + '-' + parts[1] + '-' + parts[0];
+                }
+                return inputDate; // Return the original input if not in expected format
+            }
+            
+            // Function to retrieve CSRF token
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+        });   
+        function formatDateInput(input) {
+            var formattedValue = input.value.replace(/[^\d]/g, ''); // Remove non-numeric characters
+            if (formattedValue.length >= 2) {
+                formattedValue = formattedValue.slice(0, 2) + '/' + formattedValue.slice(2);
+            }
+            if (formattedValue.length >= 5) {
+                formattedValue = formattedValue.slice(0, 5) + '/' + formattedValue.slice(5, 9);
+            }
+            input.value = formattedValue;
+        }     
+</script>
+     
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var courseSelect = document.getElementById("course-select");

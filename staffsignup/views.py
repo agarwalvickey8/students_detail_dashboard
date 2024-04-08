@@ -53,32 +53,39 @@ def student_list_view(request):
             except DisplayPreference.DoesNotExist:
                 return render(request, 'staffsignup/login.html', {'error_message': 'Sorry, No Display Preference is assigned to you! Please conatact Gurukripa admin.'})
             selected_model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
-            if selected_model_name == 'StudentDetails':
-                student_details_data = StudentDetails.objects.filter(Branch=staff.Branch)
+            fields = []
+            if registration_number or roll_number or course or batch:    
+                if selected_model_name == 'StudentDetails':
+                    student_details_data = StudentDetails.objects.filter(Branch=staff.Branch)
+                else:
+                    field_objects = [field for field in selected_model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail'] ]
+                    fields = [field.verbose_name for field in field_objects]
+                    selected_model_class = selected_model_class.objects.filter(StudentDetail__Branch=staff.Branch)
+                if registration_number:
+                    if selected_model_name == 'StudentDetails':
+                        student_details_data = student_details_data.filter(CoachingRegisteration=registration_number)
+                    else:
+                        selected_model_class = selected_model_class.filter(StudentDetail__CoachingRegisteration=registration_number)
+                if roll_number:
+                    if selected_model_name == 'StudentDetails':
+                        student_details_data = student_details_data.filter(CoachingRoll=roll_number)
+                    else:
+                        selected_model_class = selected_model_class.filter(StudentDetail__CoachingRoll=roll_number)                    
+                if course:
+                    if selected_model_name == 'StudentDetails':
+                        student_details_data = student_details_data.filter(Course=course)
+                    else:
+                        selected_model_class = selected_model_class.filter(StudentDetail__Course=course)
+                if batch:
+                    if selected_model_name == 'StudentDetails':
+                        student_details_data = student_details_data.filter(Batch=batch)
+                    else:
+                        selected_model_class = selected_model_class.filter(StudentDetail__Batch=batch)                   
             else:
-                field_objects = [field for field in selected_model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail'] ]
-                fields = [field.verbose_name for field in field_objects]
-                selected_model_class = selected_model_class.objects.filter(StudentDetail__Branch=staff.Branch)
-            if registration_number:
-                if selected_model_name == 'StudentDetails':
-                    student_details_data = student_details_data.filter(CoachingRegisteration=registration_number)
-                else:
-                    selected_model_class = selected_model_class.filter(StudentDetail__CoachingRegisteration=registration_number)
-            if roll_number:
-                if selected_model_name == 'StudentDetails':
-                    student_details_data = student_details_data.filter(CoachingRoll=roll_number)
-                else:
-                    selected_model_class = selected_model_class.filter(StudentDetail__CoachingRoll=roll_number)                    
-            if course:
-                if selected_model_name == 'StudentDetails':
-                    student_details_data = student_details_data.filter(Course=course)
-                else:
-                    selected_model_class = selected_model_class.filter(StudentDetail__Course=course)
-            if batch:
-                if selected_model_name == 'StudentDetails':
-                    student_details_data = student_details_data.filter(Batch=batch)
-                else:
-                    selected_model_class = selected_model_class.filter(StudentDetail__Batch=batch)                   
+                # Initialize selected_model_class with an empty queryset or instance
+                selected_model_class = selected_model_class.objects.none() if selected_model_class else None
+                # all_courses = []
+                # batch_options = {}
             all_courses = StudentDetails.objects.values_list('Course', flat=True).distinct()
             batch_options = {}
             for course in all_courses:
@@ -131,6 +138,7 @@ def update_field(request):
         field_name = request.POST.get('field_name')
         field_value = request.POST.get('field_value')
         selected_model_name = request.POST.get('selected_model_name')
+        # breakpoint()
         model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
         try:
             obj = model_class.objects.get(id=registration_id)

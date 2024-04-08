@@ -86,7 +86,8 @@ class StudentDetails(models.Model):
 class NEETRegistration(models.Model):
     StudentDetail = models.OneToOneField(StudentDetails, on_delete = models.CASCADE)
     NEETApplication = models.BigIntegerField(blank = True, null = True)
-    Mobile = models.BigIntegerField(blank = True, null = True)
+    DOB = models.DateField(blank=True, null=True)
+    Category = models.CharField(max_length=50, blank=True, null=True)
     
     def __str__(self):
         return self.StudentDetail.Name
@@ -99,7 +100,7 @@ class JEEMAIN1Registration(models.Model):
     StudentDetail = models.OneToOneField(StudentDetails, on_delete = models.CASCADE)
     JEEMAIN1Application = models.BigIntegerField(blank = True, null = True)
     Mobile = models.BigIntegerField(blank = True, null = True)
-    
+    DOB = models.DateField(blank=True, null=True)
     def __str__(self):
         return self.StudentDetail.Name
     
