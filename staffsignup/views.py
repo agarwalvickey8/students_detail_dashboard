@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from .models import DisplayPreference, Staff, StudentDetails
+from .models import DisplayPreference, Staff, StaffDetailTracking, StudentDetails
 from .forms import LoginForm
 from django.contrib.auth import logout as django_logout
 from django.apps import apps
@@ -82,10 +82,7 @@ def student_list_view(request):
                     else:
                         selected_model_class = selected_model_class.filter(StudentDetail__Batch=batch)                   
             else:
-                # Initialize selected_model_class with an empty queryset or instance
                 selected_model_class = selected_model_class.objects.none() if selected_model_class else None
-                # all_courses = []
-                # batch_options = {}
             all_courses = StudentDetails.objects.values_list('Course', flat=True).distinct()
             batch_options = {}
             for course in all_courses:
@@ -138,15 +135,23 @@ def update_field(request):
         field_name = request.POST.get('field_name')
         field_value = request.POST.get('field_value')
         selected_model_name = request.POST.get('selected_model_name')
-        # breakpoint()
         model_class = apps.get_model(app_label='staffsignup', model_name=selected_model_name)
         try:
             obj = model_class.objects.get(id=registration_id)
+            all_fields_filled_before_update = all([getattr(obj, field.name) for field in model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail']])
             if field_value.strip():
-                setattr(obj, field_name, field_value)
+                    setattr(obj, field_name, field_value)
             else:
-                setattr(obj, field_name, None)
+                    setattr(obj, field_name, None)
             obj.save()
+            all_fields_filled_after_update = all([getattr(obj, field.name) for field in model_class._meta.get_fields() if field.name not in ['id', 'StudentDetail']])
+            if all_fields_filled_after_update and not all_fields_filled_before_update:
+                user_id = request.session.get('user_id')
+                if user_id:
+                    staff = Staff.objects.get(id=user_id)
+                    tracking, created = StaffDetailTracking.objects.get_or_create(staff=staff)
+                    tracking.details_added += 1
+                    tracking.save()
             return JsonResponse({'success': True})
         except model_class.DoesNotExist:
             return JsonResponse({'success': False, 'error': f'{selected_model_name} not found'})

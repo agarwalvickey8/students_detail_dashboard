@@ -101,7 +101,13 @@
         
         .save-button:hover {
             background-color: #0056b3; /* Darker blue color on hover */
-        }        
+        }  
+        .error-message {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: -10px;
+            margin-bottom: 20px;
+        }      
     </style>
 </head>
 <body>
@@ -136,6 +142,7 @@
                     <input type="text" name="roll_number" placeholder="Search by Roll Number" value="{{ roll_number }}">
                     <input type="text" name="registration_number" placeholder="Search by Registration Number" value = "{{registration_number}}">
                     <button type="submit">Apply Filter</button>
+                    <span id="filter-error" class="error-message"></span>
                 </form>
             </div>            
             {% if selected_model_name == 'StudentDetails' %}
@@ -465,7 +472,37 @@
             input.value = formattedValue;
         }     
 </script>
-     
+   <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        var filterForm = document.getElementById("filter-form");
+        var filterSubmit = document.getElementById("filter-submit");
+        var filterError = document.getElementById("filter-error");
+    
+        filterForm.addEventListener("submit", function(event) {
+            // Prevent default form submission
+            event.preventDefault();
+    
+            // Perform client-side validation
+            var registrationNumber = document.querySelector('input[name="registration_number"]').value;
+            var rollNumber = document.querySelector('input[name="roll_number"]').value;
+    
+            // Check if the registration number is not a number
+            if (registrationNumber && !/^\d+$/.test(registrationNumber)) {
+                filterError.textContent = "Please enter a valid registration number.";
+                return;
+            }
+    
+            // Check if the roll number is not a number
+            if (rollNumber && !/^\d+$/.test(rollNumber)) {
+                filterError.textContent = "Please enter a valid roll number.";
+                return;
+            }
+    
+            // Submit the form if validation passes
+            filterForm.submit();
+        });
+    });
+</script>  
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         var courseSelect = document.getElementById("course-select");

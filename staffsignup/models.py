@@ -107,3 +107,10 @@ class JEEMAIN1Registration(models.Model):
     class Meta:
         verbose_name = "JEE Main 1 Registrations"
         verbose_name_plural = "JEE Main 1 Registrations"
+        
+class StaffDetailTracking(models.Model):
+    staff = models.OneToOneField(Staff, on_delete=models.CASCADE)
+    details_added = models.PositiveIntegerField(default=0)
+    details_added_flag = models.BooleanField(default=False)
+    def __str__(self):
+        return f"{self.staff} - {self.details_added} details added"

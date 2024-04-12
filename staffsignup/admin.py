@@ -1,11 +1,20 @@
 from django.contrib import admin, messages
-from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StudentDetails, JEEMAIN1Registration
+from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
 from django import forms
 from django.http import HttpResponseRedirect
 import pandas as pd
 from django.urls import path
 from django.contrib import admin
 import re
+from django.contrib.auth.views import LoginView
+class CustomAdminLoginView(LoginView):
+    template_name = 'admin/login.html'
+    def form_valid(self, form):
+        # Extend the session timeout to 30 minutes upon successful login
+        self.request.session.set_expiry(1800)  # 30 minutes
+        return super().form_valid(form)
+
+admin.site.login = CustomAdminLoginView.as_view()
 admin.site.site_header = 'Gurukripa  Administration'
 class BranchAdmin(admin.ModelAdmin):
     list_display = ('id', 'Name')  # Show the Branch ID and Name in the list
@@ -40,6 +49,11 @@ class DisplayPreferenceAdmin(admin.ModelAdmin):
     list_display = ('staff_username', 'model_name')
     
 class StudentDetailsAdmin(admin.ModelAdmin):
+    def has_delete_permission(self, request, obj=None):
+        return False
+    search_fields = ('Name', 'Course', 'CoachingRoll', 'Batch')
+    list_filter = ('Course', 'Batch', 'Exam', 'Branch')
+    list_display = ('Name', 'Course', 'CoachingRoll', 'Batch', 'Exam', 'Branch')
     def extract_phone_number(self, raw_number):
         if pd.notnull(raw_number):
             raw_number_str = str(raw_number)
@@ -108,7 +122,6 @@ class StudentDetailsAdmin(admin.ModelAdmin):
             existing_student = StudentDetails.objects.filter(CoachingRoll=roll_number).first()
 
             if existing_student:
-                # Update the existing student record
                 try:
                     existing_student.CoachingRegisteration = row["Registration Number"]
                     existing_student.Name = row["Student's Name"]
@@ -180,15 +193,23 @@ class StudentDetailsAdmin(admin.ModelAdmin):
             messages.warning(request, f"{error_count} student(s) encountered errors.")
 
 class NEETRegistrationAdmin(admin.ModelAdmin):
-    list_display = ('StudentDetail', 'NEETApplication', 'DOB', 'Category')
-
+    list_display = ('student_name', 'Coaching_Roll','NEETApplication', 'DOB', 'Category')
+    search_fields = ('StudentDetail__Name','StudentDetail__CoachingRoll', 'NEETApplication')
+    list_filter = ('StudentDetail__Course', 'StudentDetail__Batch', 'StudentDetail__Exam', 'StudentDetail__Branch')
     def student_name(self, obj):
         return obj.StudentDetail.Name
-    
+    def Coaching_Roll(self, obj):
+        return obj.StudentDetail.CoachingRoll
+    def has_delete_permission(self, request, obj=None):
+        return False
 class JEEMAIN1RegistrationAdmin(admin.ModelAdmin):
-    list_display = ('student_name', 'JEEMAIN1Application', 'Mobile', 'DOB')
+    list_display = ('student_name','Coaching_Roll', 'JEEMAIN1Application', 'Mobile', 'DOB')
+    search_fields = ('StudentDetail__Name','StudentDetail__CoachingRoll', 'JEEMAIN1Application')
+    list_filter = ('StudentDetail__Course', 'StudentDetail__Batch', 'StudentDetail__Exam', 'StudentDetail__Branch')
     def student_name(self, obj):
         return obj.StudentDetail.Name
+    def Coaching_Roll(self, obj):
+        return obj.StudentDetail.CoachingRoll
     def has_delete_permission(self, request, obj=None):
         return False
 class StaffAddForm(forms.ModelForm):
@@ -217,11 +238,12 @@ class StaffAdmin(admin.ModelAdmin):
             return super().get_fieldsets(request, obj)
         else:
             return [(None, {'fields': ['Name', 'Branch']})]
-
+class StaffDetailTrackingAdmin(admin.ModelAdmin):
+    list_display = ['staff', 'details_added']
+admin.site.register(StaffDetailTracking, StaffDetailTrackingAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Branch, BranchAdmin)
 admin.site.register(StudentDetails, StudentDetailsAdmin)
 admin.site.register(DisplayPreference, DisplayPreferenceAdmin)
 admin.site.register(NEETRegistration, NEETRegistrationAdmin)
 admin.site.register(JEEMAIN1Registration, JEEMAIN1RegistrationAdmin)
-# admin.site.unregister(Group)
