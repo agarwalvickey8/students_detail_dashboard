@@ -197,12 +197,34 @@ class NEETRegistrationAdmin(admin.ModelAdmin):
     list_display = ('student_name', 'Coaching_Roll','NEETApplication', 'DOB', 'Category')
     search_fields = ('StudentDetail__Name','StudentDetail__CoachingRoll', 'NEETApplication')
     list_filter = ('StudentDetail__Course', 'StudentDetail__Batch', 'StudentDetail__Exam', 'StudentDetail__Branch')
+    actions = ['download_student_data']
     def student_name(self, obj):
         return obj.StudentDetail.Name
     def Coaching_Roll(self, obj):
         return obj.StudentDetail.CoachingRoll
     def has_delete_permission(self, request, obj=None):
         return False
+    def download_student_data(self, request, queryset):
+        response = HttpResponse(content_type='text/xlsx')
+        response['Content-Disposition'] = 'attachment; filename="student_data.xlsx"'
+
+        writer = csv.writer(response)
+        writer.writerow(['COACHING ROLL', 'STUDENT NAME','Fathers Name','Mothers Name','DOB1', 'NEETAPPLICATION', 'DOB2'])
+
+        for obj in queryset:
+            writer.writerow([
+                obj.StudentDetail.CoachingRoll,
+                obj.StudentDetail.Name,
+                obj.StudentDetail.FatherName,
+                obj.StudentDetail.MotherName,
+                obj.StudentDetail.DOB,
+                obj.NEETApplication,
+                obj.DOB
+            ])
+
+        return response
+
+    download_student_data.short_description = "Download Student Data"
 class JEEMAIN1RegistrationAdmin(admin.ModelAdmin):
     list_display = ('student_name','Coaching_Roll', 'JEEMAIN1Application', 'Mobile', 'DOB')
     search_fields = ('StudentDetail__Name','StudentDetail__CoachingRoll', 'JEEMAIN1Application')

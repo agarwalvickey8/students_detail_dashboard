@@ -8,8 +8,8 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 """
 # settings.py
 import os
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
@@ -21,10 +21,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 from pathlib import Path
 
 # Initialise environment variables
-# DB_HOST = os.getenv("DATABASE_HOST")
-# DB_USER = os.getenv("DATABASE_USER")
-# DB_PASS = os.getenv("DATABASE_PASS")
-# DB_NAME = os.getenv("DATABASE_NAME")
+DB_HOST = os.getenv("DATABASE_HOST")
+DB_USER = os.getenv("DATABASE_USER")
+DB_PASS = os.getenv("DATABASE_PASS")
+DB_NAME = os.getenv("DATABASE_NAME")
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -93,10 +93,10 @@ WSGI_APPLICATION = 'studentsdata.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'studentsdata',
-        'USER': 'root',
-        'PASSWORD': 'Vickey@gci',
-        'HOST': 'localhost',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASS,
+        'HOST': DB_HOST,
         'PORT': '3306',
     }
 }
