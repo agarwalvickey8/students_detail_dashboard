@@ -1,7 +1,8 @@
+import csv
 from django.contrib import admin, messages
 from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
 from django import forms
-from django.http import HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect
 import pandas as pd
 from django.urls import path
 from django.contrib import admin
@@ -223,8 +224,9 @@ class StaffEditForm(forms.ModelForm):
         fields = '__all__'
 
 class StaffAdmin(admin.ModelAdmin):
-    list_display = ['Name', 'Branch', 'Username', 'Password']
+    list_display = ['Name', 'Branch', 'Username', 'Password', 'details_added']
     readonly_fields = ['Username']
+    actions = ['generate_staff_report']
 
     def get_form(self, request, obj=None, **kwargs):
         if obj:
@@ -238,6 +240,25 @@ class StaffAdmin(admin.ModelAdmin):
             return super().get_fieldsets(request, obj)
         else:
             return [(None, {'fields': ['Name', 'Branch']})]
+    
+    def details_added(self, obj):
+        # Fetch details_added value for the staff member
+        return obj.staffdetailtracking.details_added if obj.staffdetailtracking else 0
+    details_added.short_description = 'Details Added'
+    
+    def generate_staff_report(self, request, queryset):
+        response = HttpResponse(content_type='text/xls')
+        response['Content-Disposition'] = 'attachment; filename="staff_report.xls"'
+
+        writer = csv.writer(response)
+        writer.writerow(['Name', 'Branch', 'Username', 'Details Added'])
+
+        for staff in queryset:
+            writer.writerow([staff.Name, staff.Branch, staff.Username, staff.staffdetailtracking.details_added if staff.staffdetailtracking else 0])
+
+        return response
+
+    generate_staff_report.short_description = "Generate Staff Report"
 class StaffDetailTrackingAdmin(admin.ModelAdmin):
     list_display = ['staff', 'details_added']
 admin.site.register(StaffDetailTracking, StaffDetailTrackingAdmin)

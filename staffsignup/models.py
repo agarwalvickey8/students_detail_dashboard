@@ -114,3 +114,15 @@ class StaffDetailTracking(models.Model):
     details_added_flag = models.BooleanField(default=False)
     def __str__(self):
         return f"{self.staff} - {self.details_added} details added"
+    
+class FieldHistory(models.Model):
+    staff = models.ForeignKey('Staff', on_delete=models.CASCADE)
+    field_name = models.CharField(max_length=100)
+    old_value = models.CharField(max_length=255, null = True, blank = True)
+    new_value = models.CharField(max_length=255)
+    action = models.CharField(max_length=10, choices=(('add', 'Add'), ('edit', 'Edit')))
+    model_name=models.CharField(max_length=20)
+    coaching_roll = models.BigIntegerField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    def __str__(self):
+        return f"{self.staff.Username} - {self.field_name} - {self.action} - {self.timestamp}"

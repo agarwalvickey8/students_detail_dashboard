@@ -231,7 +231,7 @@
         
                 // Remove existing error messages
                 $('#' + fieldName.toLowerCase() + '-error').remove();
-        
+                
                 // Validate Mobile field
                 if (fieldName === 'Mobile') {
                     if (inputValue.trim().length !== 10 || !/^([4-9])\d{9}$/.test(inputValue.trim())) {
@@ -239,7 +239,15 @@
                         return;
                     }
                 }
-        
+
+                // Validate Category field
+                if (fieldName === 'Category') {
+                    if (inputValue.trim() === '') {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Category cannot be left empty</div>').insertBefore($(this));
+                        return;
+                    }
+                }
+
                 // Validate NEETApplication field
                 if (fieldName === 'NEETApplication' || fieldName === 'JEEMAIN1Application') {
                     if (inputValue.trim().length !== 12) {
@@ -254,13 +262,33 @@
                         $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Please enter DOB in dd/mm/yyyy format</div>').insertBefore($(this));
                         return;
                     }
+                    if (!/^\d{2}\/\d{2}\/\d{4}$/.test(inputValue)) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Please enter DOB in dd/mm/yyyy format</div>').insertBefore($(this));
+                        return;
+                    }
                     var dateParts = inputValue.split('/');
-                    if (dateParts.length === 3) {
-                        var year = parseInt(dateParts[2], 10);
-                        if (year < 1990 || year > 2009) {
-                            $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">DOB must be between 01-01-1990 and 31-12-2009</div>').insertBefore($(this));
-                            return;
-                        }
+                    var day = parseInt(dateParts[0], 10);
+                    var month = parseInt(dateParts[1], 10);
+                    var year = parseInt(dateParts[2], 10);
+                    if (isNaN(day) || isNaN(month) || isNaN(year)) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Invalid date format</div>').insertBefore($(this));
+                        return;
+                    }
+                    
+                    if (day < 1 || day > 31 || month < 1 || month > 12) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Invalid date or month</div>').insertBefore($(this));
+                        return;
+                    }
+                    
+                    var dateObject = new Date(year, month - 1, day); // Month is zero-based
+                    if (dateObject.getFullYear() !== year || dateObject.getMonth() !== month - 1 || dateObject.getDate() !== day) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">Invalid date</div>').insertBefore($(this));
+                        return;
+                    }
+                    
+                    if (year < 1990 || year > 2009) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">DOB must be between 01-01-1990 and 31-12-2009</div>').insertBefore($(this));
+                        return;
                     }
                 }
         
@@ -426,7 +454,7 @@
         
             // Function to suggest categories based on user input
             function suggestCategory(input) {
-                var categories = ['GENERAL', 'EWS', 'OBC', 'SC', 'ST'];
+                var categories = ['NA','GENERAL', 'EWS', 'OBC', 'SC', 'ST'];
                 var suggestions = [];
                 categories.forEach(function(category) {
                     if (category.startsWith(input)) {
