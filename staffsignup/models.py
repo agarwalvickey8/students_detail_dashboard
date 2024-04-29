@@ -44,7 +44,7 @@ class Staff(models.Model):
         
 class DisplayPreference(models.Model):
     staff = models.ForeignKey('Staff', on_delete = models.CASCADE)
-    model_name = models.CharField(max_length = 100)
+    model_name = models.CharField(max_length = 255)
     
     class Meta:
         verbose_name = "Display Preference"
@@ -126,3 +126,15 @@ class FieldHistory(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
     def __str__(self):
         return f"{self.staff.Username} - {self.field_name} - {self.action} - {self.timestamp}"
+
+class JeeAdvReg(models.Model):
+    StudentDetail = models.OneToOneField(StudentDetails, on_delete = models.CASCADE)
+    AdvanceRegNo = models.CharField(max_length = 252, blank = True, null = True)
+    DOB = models.DateField(blank=True, null=True)
+    Mobile = models.BigIntegerField(blank = True, null = True)
+    def __str__(self):
+        return self.StudentDetail.Name
+    
+    class Meta:
+        verbose_name = "JEE Advanced Registrations"
+        verbose_name_plural = "JEE Advanced Registrations"

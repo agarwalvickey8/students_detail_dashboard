@@ -1,6 +1,6 @@
 import csv
 from django.contrib import admin, messages
-from staffsignup.models import Branch, DisplayPreference, NEETRegistration, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
+from staffsignup.models import Branch, DisplayPreference,JeeAdvReg, NEETRegistration, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 import pandas as pd
@@ -48,13 +48,32 @@ class DisplayPreferenceAdmin(admin.ModelAdmin):
     staff_username.short_description = 'Staff Username'  # Optional: Customize the column header
 
     list_display = ('staff_username', 'model_name')
-    
+
+def sync_jee_advanced_registration(modeladmin, request, queryset):
+    # Initialize a counter to keep track of synced registrations
+    sync_count = 0
+
+    # Iterate over selected students and create JEE Advanced registrations if they don't exist
+    for student in queryset:
+        if student.Exam == 'JEE' and not JeeAdvReg.objects.filter(StudentDetail=student).exists():
+            JeeAdvReg.objects.create(StudentDetail=student)
+            sync_count += 1
+
+    # Show success message
+    if sync_count == 1:
+        message_bit = "1 JEE Advanced registration synced."
+    else:
+        message_bit = f"{sync_count} JEE Advanced registrations synced."
+    modeladmin.message_user(request, message_bit, level=messages.SUCCESS)
+
+sync_jee_advanced_registration.short_description = "Sync JEE Advanced Registration for selected students"
 class StudentDetailsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
     search_fields = ('Name', 'Course', 'CoachingRoll', 'Batch')
     list_filter = ('Course', 'Batch', 'Exam', 'Branch')
     list_display = ('Name', 'Course', 'CoachingRoll', 'Batch', 'Exam', 'Branch')
+    actions = [sync_jee_advanced_registration]
     def extract_phone_number(self, raw_number):
         if pd.notnull(raw_number):
             raw_number_str = str(raw_number)
@@ -107,6 +126,7 @@ class StudentDetailsAdmin(admin.ModelAdmin):
             else:
                 dob = None
             branch_name = row["Branch_id"]
+            # breakpoint()
             try:
                 branch = Branch.objects.get(Name=branch_name)
                 branch_id = branch.id
@@ -205,8 +225,8 @@ class NEETRegistrationAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
     def download_student_data(self, request, queryset):
-        response = HttpResponse(content_type='text/xlsx')
-        response['Content-Disposition'] = 'attachment; filename="student_data.xlsx"'
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="student_data.csv"'
 
         writer = csv.writer(response)
         writer.writerow(['COACHING ROLL', 'STUDENT NAME','Fathers Name','Mothers Name','DOB1', 'NEETAPPLICATION', 'DOB2'])
@@ -221,7 +241,6 @@ class NEETRegistrationAdmin(admin.ModelAdmin):
                 obj.NEETApplication,
                 obj.DOB
             ])
-
         return response
 
     download_student_data.short_description = "Download Student Data"
@@ -283,6 +302,20 @@ class StaffAdmin(admin.ModelAdmin):
     generate_staff_report.short_description = "Generate Staff Report"
 class StaffDetailTrackingAdmin(admin.ModelAdmin):
     list_display = ['staff', 'details_added']
+
+
+class JeeAdvRegAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'AdvanceRegNo', 'Mobile', 'DOB')
+    search_fields = ('StudentDetail__Name','StudentDetail__CoachingRoll', 'AdvanceRegNo')
+    list_filter = ('StudentDetail__Course', 'StudentDetail__Batch', 'StudentDetail__Exam', 'StudentDetail__Branch')
+
+    def student_name(self, obj):
+        return obj.StudentDetail.Name
+    
+    def has_delete_permission(self, request, obj=None):
+        return False
+
+admin.site.register(JeeAdvReg, JeeAdvRegAdmin)
 admin.site.register(StaffDetailTracking, StaffDetailTrackingAdmin)
 admin.site.register(Staff, StaffAdmin)
 admin.site.register(Branch, BranchAdmin)

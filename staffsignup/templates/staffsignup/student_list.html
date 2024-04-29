@@ -191,7 +191,7 @@
                             {% for field_name in fields %}
                                 {% if field_name == 'DOB' %}
                                     <td><input type="text" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}" placeholder="DD/MM/YYYY" pattern="\d{2}/\d{2}/\d{4}" maxlength="10" required oninput="formatDateInput(this)"></td>
-                                {% elif field_name == 'Category' %}
+                                {% elif field_name == 'Category' or field_name == 'AdvanceRegNo' %}
                                     <td><input type="text" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}"></td>
                                 {% else %}
                                     <td><input type="number" name="{{ field_name }}" value="{{ selected_model|lookup:field_name|default_if_none:'' }}"></td>
@@ -252,6 +252,24 @@
                 if (fieldName === 'NEETApplication' || fieldName === 'JEEMAIN1Application') {
                     if (inputValue.trim().length !== 12) {
                         $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">NEETApplication number must be 12 digits</div>').insertBefore($(this));
+                        return;
+                    }
+                }
+
+                if (fieldName === 'AdvanceRegNo') {
+                    var firstChar = inputValue.trim().charAt(0);
+                    // Check if the first character is a letter
+                    if (!/^[A-Za-z]/.test(firstChar)) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">First character must be a letter</div>').insertBefore($(this));
+                        return;
+                    }
+                    // Check if the first character is uppercase
+                    if (firstChar !== firstChar.toUpperCase()) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">First character must be uppercase</div>').insertBefore($(this));
+                        return;
+                    }
+                    if (inputValue.trim().length !== 12) {
+                        $('<div id="' + fieldName.toLowerCase() + '-error" style="color: red;">JEE Advanced Application number must be 12 characters</div>').insertBefore($(this));
                         return;
                     }
                 }
