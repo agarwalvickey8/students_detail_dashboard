@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Review Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            margin-top: 20px; /* Add margin to the top of the heading */
+            text-align: center; /* Center the heading */
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .box {
+            flex: 1;
+            margin: 10px;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        h1, h2 {
+            color: #333;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        form {
+            margin-top: 20px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        label {
+            margin-right: 10px;
+        }
+
+        input[type="button"] {
+            margin-right: 10px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        input[type="button"]:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 600px) {
+            .box {
+                flex: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Review Student Details</h1>
+    <div class="container">
+        <div class="box">
+            <h2>Coaching Details</h2>
+            {% if student_details_instance %}
+            <p>Gci Roll Number: {{ student_details_instance.CoachingRoll }}</p>
+            <p>Student Name: {{ student_details_instance.Name }}</p>
+            <p>Father's Name: {{ student_details_instance.FatherName }}</p>
+            <p>Category: {{ student_details_instance.Category }}</p>
+            <p>Date of Birth: {{ student_details_instance.DOB }}</p>
+            {% endif %}
+        </div>
+
+        <div class="box">
+            <h2>NEET Website Details</h2>
+            {% if neet_city_in_instance %}
+            <p>NEET Roll Number: {{ neet_city_in_instance.NEETRoll }}</p>
+            <p>Student Name: {{ neet_city_in_instance.Name }}</p>
+            <p>Father's Name: {{ neet_city_in_instance.FatherName }}</p>
+            <p>Category: {{ neet_city_in_instance.Category }}</p>
+            <p>Date of Birth: {{ neet_city_in_instance.DOB }}</p>
+            {% endif %}
+        </div>
+    </div>
+    <form id="reviewForm" method="post" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" id="review_option" name="review_option">
+    </form>
+    
+    <div class="container">
+        <input type="button" id="correctBtn" value="Correct">
+        <input type="button" id="incorrectBtn" value="Incorrect">
+        <input type="button" id="reviewLaterBtn" value="Review Later">
+    </div>
+    
+    <script>
+        function submitForm(reviewOption) {
+            document.getElementById("review_option").value = reviewOption;
+            document.getElementById("reviewForm").submit();
+        }
+        document.getElementById("correctBtn").addEventListener("dblclick", function() {
+            submitForm("correct");
+        });
+
+        document.getElementById("incorrectBtn").addEventListener("dblclick", function() {
+            submitForm("incorrect");
+        });
+
+        document.getElementById("reviewLaterBtn").addEventListener("dblclick", function() {
+            submitForm("review_later");
+        });
+    </script>
+</body>
+</html>

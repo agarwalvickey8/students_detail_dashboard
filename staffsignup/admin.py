@@ -1,6 +1,7 @@
 import csv
 from django.contrib import admin, messages
-from staffsignup.models import Branch, DisplayPreference,JeeAdvReg, NEETRegistration, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
+from django.shortcuts import render
+from staffsignup.models import Branch, DisplayPreference,JeeAdvReg, NEETAdmitCard, NEETCityIn, NEETRegistration, RemarkStudents, Staff, StaffDetailTracking, StudentDetails, JEEMAIN1Registration
 from django import forms
 from django.http import HttpResponse, HttpResponseRedirect
 import pandas as pd
@@ -67,13 +68,33 @@ def sync_jee_advanced_registration(modeladmin, request, queryset):
     modeladmin.message_user(request, message_bit, level=messages.SUCCESS)
 
 sync_jee_advanced_registration.short_description = "Sync JEE Advanced Registration for selected students"
+
+def sync_neet_city_intimation(modeladmin, request, queryset):
+    # Initialize a counter to keep track of synced intimation
+    sync_count = 0
+
+    # Iterate over selected students and create NEET City Intimation if they don't exist
+    for student in queryset:
+        if student.Exam == 'NEET' and not NEETCityIn.objects.filter(StudentDetail=student).exists():
+            NEETCityIn.objects.create(StudentDetail=student)
+            sync_count += 1
+
+    # Show success message
+    if sync_count == 1:
+        message_bit = "1 NEET City Intimation synced."
+    else:
+        message_bit = f"{sync_count} NEET City Intimations synced."
+    modeladmin.message_user(request, message_bit, level=messages.SUCCESS)
+
+sync_neet_city_intimation.short_description = "Sync NEET City Intimation for selected students"
+
 class StudentDetailsAdmin(admin.ModelAdmin):
     def has_delete_permission(self, request, obj=None):
         return False
     search_fields = ('Name', 'Course', 'CoachingRoll', 'Batch')
     list_filter = ('Course', 'Batch', 'Exam', 'Branch')
     list_display = ('Name', 'Course', 'CoachingRoll', 'Batch', 'Exam', 'Branch')
-    actions = [sync_jee_advanced_registration]
+    actions = [sync_jee_advanced_registration, sync_neet_city_intimation]
     def extract_phone_number(self, raw_number):
         if pd.notnull(raw_number):
             raw_number_str = str(raw_number)
@@ -314,7 +335,38 @@ class JeeAdvRegAdmin(admin.ModelAdmin):
     
     def has_delete_permission(self, request, obj=None):
         return False
+class NEETCityInAdmin(admin.ModelAdmin):
+    list_display = ('student_name', 'NEETApplication', 'Name', 'FatherName', 'Category', 'Pwd', 'City', 'State')
+    search_fields = ('StudentDetail__CoachingRoll', 'NEETApplication', 'Name', 'FatherName', 'Category', 'City', 'State')
+    def student_name(self, obj):
+        return obj.StudentDetail.Name
 
+    def has_delete_permission(self, request, obj=None):
+        return False
+class RemarkStudentsAdmin(admin.ModelAdmin):
+    list_display = ('student_name','student_roll','remarks')
+    search_fields = ('StudentDetail__CoachingRoll','StudentDetail__Name','remarks')
+    list_filter = ('StudentDetail__Branch','StudentDetail__Course', 'StudentDetail__Batch')
+    def has_delete_permission(self, request, obj=None):
+        return False
+    def student_roll(self, obj):
+         return obj.StudentDetail.CoachingRoll
+    def student_name(self, obj):
+        return obj.StudentDetail.Name
+    
+class NEETAdmitCardAdmin(admin.ModelAdmin):
+    list_display = ('student_name','student_roll','Name', 'NEETApplication')
+    search_fields = ('StudentDetail__CoachingRoll','NEETApplication','NEETRoll','StudentDetail__Name','Name')
+    list_filter = ('StudentDetail__Branch','StudentDetail__Course', 'StudentDetail__Batch')
+    def has_delete_permission(self, request, obj=None):
+        return False
+    def student_name(self, obj):
+        return obj.StudentDetail.Name
+    def student_roll(self, obj):
+        return obj.StudentDetail.CoachingRoll
+admin.site.register(NEETAdmitCard, NEETAdmitCardAdmin)
+admin.site.register(RemarkStudents, RemarkStudentsAdmin)
+admin.site.register(NEETCityIn, NEETCityInAdmin)
 admin.site.register(JeeAdvReg, JeeAdvRegAdmin)
 admin.site.register(StaffDetailTracking, StaffDetailTrackingAdmin)
 admin.site.register(Staff, StaffAdmin)

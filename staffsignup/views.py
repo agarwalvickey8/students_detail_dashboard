@@ -1,6 +1,6 @@
 from django.http import JsonResponse
 from django.shortcuts import render, redirect
-from .models import DisplayPreference, FieldHistory, Staff, StaffDetailTracking, StudentDetails
+from .models import DisplayPreference, FieldHistory, NEETAdmitCard, NEETCityIn, RemarkStudents, Staff, StaffDetailTracking, StudentDetails
 from .forms import LoginForm
 from django.contrib.auth import logout as django_logout
 from django.apps import apps
@@ -17,7 +17,10 @@ def login_view(request):
                 user = Staff.objects.get(Username=username)
                 if password == user.Password:
                     request.session['user_id'] = user.id
-                    return redirect('student_list')
+                    if DisplayPreference.objects.get(staff=user).model_name == 'RemarkStudents':
+                        return redirect('review_page')
+                    else:
+                        return redirect('student_list')
                 else:
                     error_message = 'Invalid username or password'
             except Staff.DoesNotExist:
@@ -31,7 +34,32 @@ def login_view(request):
 def logout(request):
     django_logout(request)
     return redirect('/')
- 
+
+def review_page(request):
+    if 'user_id' in request.session:
+        next_student = RemarkStudents.objects.filter(remarks='').first()
+        if next_student:
+            neet_city_in_instance = NEETAdmitCard.objects.get(StudentDetail=next_student.StudentDetail)
+            student_details_instance = next_student.StudentDetail
+            # breakpoint()
+            if request.method == 'POST':
+                review_option = request.POST.get('review_option')
+                if review_option in ['correct', 'incorrect', 'review_later']:
+                    next_student.remarks = review_option
+                    next_student.save()
+                    # breakpoint()
+                return redirect('review_page')
+            context = {
+                'neet_city_in_instance': neet_city_in_instance,
+                'student_details_instance': student_details_instance,
+            }
+            # breakpoint()
+            return render(request, 'staffsignup/review_page.html', context)
+        else:
+            return render(request, 'staffsignup/no_student_left.html',next_student)
+    else:
+        return redirect('/')
+    
 def student_list_view(request):
     if 'user_id' in request.session:
         user_id = request.session['user_id']

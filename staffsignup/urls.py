@@ -1,5 +1,3 @@
-# staffsignup/urls.py
-
 from django.urls import path
 from . import views
 
@@ -9,4 +7,5 @@ urlpatterns = [
     path('logout/', views.logout, name='logout'),
     path('update_field/', views.update_field, name='update_field'),
     path('get_batch_options/', views.get_batch_options, name='get_batch_options'),
+    path('review-page/', views.review_page, name='review_page')
 ]
