@@ -358,12 +358,41 @@ class NEETAdmitCardAdmin(admin.ModelAdmin):
     list_display = ('student_name','student_roll','Name', 'NEETApplication')
     search_fields = ('StudentDetail__CoachingRoll','NEETApplication','NEETRoll','StudentDetail__Name','Name')
     list_filter = ('StudentDetail__Branch','StudentDetail__Course', 'StudentDetail__Batch')
+    actions = ['download_student_data']
     def has_delete_permission(self, request, obj=None):
         return False
     def student_name(self, obj):
         return obj.StudentDetail.Name
     def student_roll(self, obj):
         return obj.StudentDetail.CoachingRoll
+    def download_student_data(self, request, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="neet_admit.csv"'
+
+        writer = csv.writer(response)
+        writer.writerow(['COACHING ROLL', 'COACHING STUDENT NAME','COACHING FATHER NAME','COACHING MOTHER NAME','COACHING DOB', 'NEET NAME', 'NEET FATHER NAME','NEET DOB', 'NEET ROLL NUMBER','NEET APPLICATION NUMBER','NEET CATEGORY','NEET CENTRE NUMBER','NEET CENTRE NAME','NEET CENTRE ADDRESS','PWD', 'STATE OF ELEGIBILITY' ])
+        for obj in queryset:
+            writer.writerow([
+                obj.StudentDetail.CoachingRoll,
+                obj.StudentDetail.Name,
+                obj.StudentDetail.FatherName,
+                obj.StudentDetail.MotherName,
+                obj.StudentDetail.DOB,
+                obj.Name,
+                obj.FatherName,
+                obj.DOB,
+                obj.NEETRoll,
+                obj.NEETApplication,
+                obj.Category,
+                obj.CentreNo,
+                obj.CentreName,
+                obj.CentreAddress,
+                obj.PWD,
+                obj.Stateofele
+            ])
+        return response
+
+    download_student_data.short_description = "Download Student NEET Admit Card Data"
 admin.site.register(NEETAdmitCard, NEETAdmitCardAdmin)
 admin.site.register(RemarkStudents, RemarkStudentsAdmin)
 admin.site.register(NEETCityIn, NEETCityInAdmin)
